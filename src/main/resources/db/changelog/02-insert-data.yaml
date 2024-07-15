@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2
+      author: matushkin
+      changes:
+        - sqlFile:
+            path: db/data/contractor_role.sql
+        - sqlFile:
+            path: db/data/deal_status.sql
+        - sqlFile:
+            path: db/data/deal_type.sql
