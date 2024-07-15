@@ -1,0 +1,13 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    container_name: "deal_postgres"
+    ports:
+      - '5432:5432'
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${DEAL_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${DEAL_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${DEAL_POSTGRES_DB}
+    restart: always

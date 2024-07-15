@@ -1,0 +1,18 @@
+{
+  "properties": [
+    {
+      "name": "audit-lib-spring-boot-starter.console-enabled",
+      "type": "java.lang.Boolean",
+      "description": "True to enable console logging, false to disable."
+    },
+    {
+      "name": "audit-lib-spring-boot-starter.file-enabled",
+      "type": "java.lang.Boolean",
+      "description": "True to enable file logging, false to disable."
+    },
+    {
+      "name": "audit-lib-spring-boot-starter.file-path",
+      "type": "java.lang.String",
+      "description": "Path for logging file."
+    }
+  ] }
