@@ -48,6 +48,7 @@ public class DealServiceImpl implements DealService {
         Optional<Deal> dealOptional = repository.findById(id);
         Deal deal = dealOptional.orElseThrow(() -> new EntityNotFoundException("Deal not found for ID: " + id));
         deal.setStatus(status);
+        repository.save(deal);
         return ResponseDealDTO.toDTO(deal);
     }
 
