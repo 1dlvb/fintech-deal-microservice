@@ -2,6 +2,7 @@ package com.fintech.deal.service;
 
 import com.fintech.deal.dto.ResponseDealDTO;
 import com.fintech.deal.dto.ChangeStatusOfDealDTO;
+import com.fintech.deal.dto.ResponseDealWithContractorsDTO;
 import com.fintech.deal.dto.SaveOrUpdateDealDTO;
 import com.fintech.deal.model.Deal;
 
@@ -14,5 +15,7 @@ public interface DealService {
     ResponseDealDTO changeStatus(ChangeStatusOfDealDTO changeStatusOfDealDTO);
 
     Deal getDealById(UUID id);
+
+    ResponseDealWithContractorsDTO getDealWithContractorsById(UUID id);
 
 }

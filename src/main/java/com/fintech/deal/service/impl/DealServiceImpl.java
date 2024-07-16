@@ -1,10 +1,14 @@
 package com.fintech.deal.service.impl;
 
+import com.fintech.deal.dto.ContractorDTO;
 import com.fintech.deal.dto.ResponseDealDTO;
 import com.fintech.deal.dto.ChangeStatusOfDealDTO;
+import com.fintech.deal.dto.ResponseDealWithContractorsDTO;
 import com.fintech.deal.dto.SaveOrUpdateDealDTO;
 import com.fintech.deal.model.Deal;
+import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.DealStatus;
+import com.fintech.deal.repository.ContractorRepository;
 import com.fintech.deal.repository.DealRepository;
 import com.fintech.deal.service.DealService;
 import com.fintech.deal.service.StatusService;
@@ -13,6 +17,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,6 +27,8 @@ public class DealServiceImpl implements DealService {
 
     @NonNull
     private final DealRepository repository;
+    @NonNull
+    private final ContractorRepository contractorRepository;
     @NonNull
     private final StatusService statusService;
 
@@ -55,6 +62,15 @@ public class DealServiceImpl implements DealService {
     @Override
     public Deal getDealById(UUID id) {
         return repository.findById(id).orElse(null);
+    }
+
+    @Override
+    public ResponseDealWithContractorsDTO getDealWithContractorsById(UUID id) {
+        Optional<Deal> optionalDeal = repository.findById(id);
+        Deal deal = optionalDeal.orElse(null);
+        List<DealContractor> contractors = contractorRepository.findAllByDealId(deal.getId());
+        return ResponseDealWithContractorsDTO.toDTO(deal,
+                contractors.stream().map(ContractorDTO::toDTO).toList());
     }
 
     private void updateProperties(Deal existingDeal, Deal newDealData) {
