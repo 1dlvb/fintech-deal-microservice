@@ -70,8 +70,8 @@ public class SaveOrUpdateDealDTO {
                 .build();
     }
 
-    public static ChangeStatusOfDealDTO toDTO(Deal deal) {
-        return ChangeStatusOfDealDTO.builder()
+    public static SaveOrUpdateDealDTO toDTO(Deal deal) {
+        return SaveOrUpdateDealDTO.builder()
                 .id(deal.getId())
                 .description(deal.getDescription())
                 .agreementNumber(deal.getAgreementNumber())
