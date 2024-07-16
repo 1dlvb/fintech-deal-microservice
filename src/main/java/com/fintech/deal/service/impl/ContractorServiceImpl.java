@@ -10,8 +10,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 public class ContractorServiceImpl implements ContractorService {
@@ -25,24 +23,24 @@ public class ContractorServiceImpl implements ContractorService {
     @Override
     @Transactional
     public ContractorDTO saveContractor(ContractorDTO contractorDTO) {
+
         DealContractor contractor = ContractorDTO.fromDTO(contractorDTO, dealService);
+        if (contractor.getMain() && repository.existsByDealIdAndMainTrue(contractor.getDeal().getId())) {
+            throw new IllegalStateException("Only one record can have main = true for each deal_id");
+        }
         if (contractor.getId() != null && repository.existsById(contractor.getId())) {
             DealContractor existingContractor = repository.findById(contractor.getId()).orElse(null);
             if (existingContractor != null) {
-//                if (existingContractor.getMain()) {
-//                    UUID dealId = contractor.getDeal().getId();
-//                    if (repository.existsByDealIdAndMainTrue(dealId, contractor.getId())) {
-//                        throw new IllegalStateException("There can only be one main contractor per deal.");
-//                    }
-//                    updateProperties(existingContractor, contractor);
-//                    contractor = repository.save(existingContractor);
-//                }
+                    updateProperties(existingContractor, contractor);
+                    contractor = repository.save(existingContractor);
             }
 
         } else {
             contractor = repository.save(contractor);
         }
         return ContractorDTO.toDTO(contractor);
+
+
     }
 
     private void updateProperties(DealContractor existingContractor, DealContractor newContractorData) {
