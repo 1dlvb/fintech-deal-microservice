@@ -6,12 +6,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface ContractorRepository extends JpaRepository<DealContractor, UUID> {
 
-    @Query("SELECT COUNT(dc) > 0 FROM DealContractor dc WHERE dc.main = true AND dc.deal.id = :dealId")
+    @Query("SELECT COUNT(c) > 0 FROM DealContractor c WHERE c.main = true AND c.deal.id = :dealId")
     boolean existsByDealIdAndMainTrue(@Param("dealId") UUID dealId);
+
+    @Query("SELECT c FROM DealContractor c WHERE c.deal.id = :dealId")
+    List<DealContractor> findAllByDealId(@Param("dealId") UUID dealId);
 
 }
