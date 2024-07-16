@@ -1,14 +1,25 @@
 package com.fintech.deal.service.impl;
 
 import com.fintech.deal.dto.ContractorDTO;
+import com.fintech.deal.dto.RoleDTO;
+import com.fintech.deal.exception.NotActiveException;
+import com.fintech.deal.model.ContractorRole;
 import com.fintech.deal.model.DealContractor;
+import com.fintech.deal.model.DealContractorRole;
 import com.fintech.deal.repository.ContractorRepository;
+import com.fintech.deal.repository.DealContractorRoleRepository;
 import com.fintech.deal.service.ContractorService;
 import com.fintech.deal.service.DealService;
+import com.fintech.deal.service.RoleService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +30,12 @@ public class ContractorServiceImpl implements ContractorService {
 
     @NonNull
     private final DealService dealService;
+
+    @NonNull
+    private final RoleService roleService;
+
+    @NonNull
+    private final DealContractorRoleRepository dealContractorRoleRepository;
 
     @Override
     @Transactional
@@ -38,9 +55,38 @@ public class ContractorServiceImpl implements ContractorService {
         } else {
             contractor = repository.save(contractor);
         }
-        return ContractorDTO.toDTO(contractor);
+        return getDtoWithRoles(contractor, contractor.getId());
+    }
+
+    @Override
+    @Transactional
+    public void deleteContractor(UUID id) throws NotActiveException {
+        Optional<DealContractor> contractorOptional = repository.findById(id);
+        DealContractor contractor = contractorOptional.orElseThrow(() ->
+                new EntityNotFoundException("Contractor not found for ID: " + id));
+        if (contractor.getIsActive()) {
+            contractor.setIsActive(false);
+            repository.save(contractor);
+        } else {
+            throw new NotActiveException("Contractor is not active");
+        }
+    }
+
+    @Override
+    public ContractorDTO addRole(UUID id, RoleDTO roleDTO) {
+        Optional<DealContractor> contractorOptional = repository.findById(id);
+        DealContractor contractor = contractorOptional.orElseThrow(() ->
+                new EntityNotFoundException("Contractor not found for ID: " + id));
+
+        ContractorRole role = roleService.findRoleById(roleDTO.getId());
+        DealContractorRole dealContractorRole = new DealContractorRole();
 
 
+        dealContractorRole.setDealContractor(contractor);
+        dealContractorRole.setContractorRole(role);
+        dealContractorRoleRepository.save(dealContractorRole);
+
+        return getDtoWithRoles(contractor, id);
     }
 
     private void updateProperties(DealContractor existingContractor, DealContractor newContractorData) {
@@ -50,6 +96,13 @@ public class ContractorServiceImpl implements ContractorService {
         existingContractor.setMain(newContractorData.getMain());
         existingContractor.setInn(newContractorData.getInn());
         existingContractor.setIsActive(newContractorData.getIsActive());
+    }
+
+    private ContractorDTO getDtoWithRoles(DealContractor contractor, UUID id) {
+        ContractorDTO dto = ContractorDTO.toDTO(contractor);
+        List<ContractorRole> contractorRoles = dealContractorRoleRepository.findRolesByContractorId(id);
+        dto.setRoles(contractorRoles);
+        return dto;
     }
 
 }

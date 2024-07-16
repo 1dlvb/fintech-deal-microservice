@@ -2,6 +2,7 @@
 
     import com.fasterxml.jackson.annotation.JsonProperty;
     import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+    import com.fintech.deal.model.ContractorRole;
     import com.fintech.deal.model.DealContractor;
     import com.fintech.deal.service.DealService;
     import lombok.AllArgsConstructor;
@@ -9,6 +10,7 @@
     import lombok.Data;
     import lombok.NoArgsConstructor;
 
+    import java.util.List;
     import java.util.UUID;
 
     @Data
@@ -35,6 +37,9 @@
 
         @JsonProperty(value = "main", defaultValue = "false")
         private Boolean main;
+
+        @JsonProperty(value = "roles")
+        private List<ContractorRole> roles;
 
         public static DealContractor fromDTO(ContractorDTO contractorDTO, DealService dealService) {
 

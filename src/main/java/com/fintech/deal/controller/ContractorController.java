@@ -1,14 +1,19 @@
 package com.fintech.deal.controller;
 
 import com.fintech.deal.dto.ContractorDTO;
+import com.fintech.deal.exception.NotActiveException;
 import com.fintech.deal.service.ContractorService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/deal-contractor")
@@ -21,6 +26,16 @@ public class ContractorController {
     @PutMapping("/save")
     public ResponseEntity<ContractorDTO> saveContractor(@RequestBody ContractorDTO contractorDTO) {
         return ResponseEntity.ok(service.saveContractor(contractorDTO));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<ContractorDTO> saveDeal(@PathVariable UUID id) {
+        try {
+            service.deleteContractor(id);
+        } catch (NotActiveException e) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.noContent().build();
     }
 
 }
