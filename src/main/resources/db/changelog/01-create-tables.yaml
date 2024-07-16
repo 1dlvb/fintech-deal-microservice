@@ -41,30 +41,6 @@ databaseChangeLog:
         - onFail: MARK_RAN
         - not:
             tableExists:
-              tableName: deal_status_dict
-      changes:
-        - createTable:
-            tableName: deal_status_dict
-            columns:
-              - column:
-                  name: id
-                  type: varchar(255)
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: name
-                  type: varchar(255)
-                  constraints:
-                    nullable: false
-
-  - changeSet:
-      id: 3
-      author: matushkin
-      preConditions:
-        - onFail: MARK_RAN
-        - not:
-            tableExists:
               tableName: deal
       changes:
         - createTable:
@@ -127,7 +103,7 @@ databaseChangeLog:
                     nullable: false
 
   - changeSet:
-      id: 4
+      id: 3
       author: matushkin
       preConditions:
         - onFail: MARK_RAN
@@ -193,7 +169,7 @@ databaseChangeLog:
             constraintName: fk_deal_contractor_deal_id
 
   - changeSet:
-      id: 5
+      id: 4
       author: matushkin
       preConditions:
         - onFail: MARK_RAN
@@ -221,7 +197,7 @@ databaseChangeLog:
                     nullable: false
 
   - changeSet:
-      id: 6
+      id: 5
       author: matushkin
       preConditions:
         - onFail: MARK_RAN
