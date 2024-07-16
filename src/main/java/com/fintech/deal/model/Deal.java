@@ -2,6 +2,7 @@ package com.fintech.deal.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,22 +17,25 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "deal")
 public class Deal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    private UUID id;
 
     @Column(name = "description")
     private String description;
@@ -63,15 +67,15 @@ public class Deal {
     private LocalDateTime closeDt;
 
     @CreatedDate
-    @Column(name = "create_date", nullable = false)
-    private LocalDate createDate;
+    @Column(name = "create_date", nullable = false, updatable = false)
+    private LocalDateTime createDate;
 
     @LastModifiedDate
     @Column(name = "modify_date")
-    private LocalDate modifyDate;
+    private LocalDateTime modifyDate;
 
     @CreatedBy
-    @Column(name = "create_user_id")
+    @Column(name = "create_user_id", nullable = false, updatable = false)
     private String createUserId;
 
     @LastModifiedBy
