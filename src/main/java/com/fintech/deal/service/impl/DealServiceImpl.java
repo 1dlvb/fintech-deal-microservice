@@ -5,10 +5,12 @@ import com.fintech.deal.dto.ResponseDealDTO;
 import com.fintech.deal.dto.ChangeStatusOfDealDTO;
 import com.fintech.deal.dto.ResponseDealWithContractorsDTO;
 import com.fintech.deal.dto.SaveOrUpdateDealDTO;
+import com.fintech.deal.model.ContractorRole;
 import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.DealStatus;
 import com.fintech.deal.repository.ContractorRepository;
+import com.fintech.deal.repository.DealContractorRoleRepository;
 import com.fintech.deal.repository.DealRepository;
 import com.fintech.deal.service.DealService;
 import com.fintech.deal.service.StatusService;
@@ -31,6 +33,8 @@ public class DealServiceImpl implements DealService {
     private final ContractorRepository contractorRepository;
     @NonNull
     private final StatusService statusService;
+    @NonNull
+    private final DealContractorRoleRepository dealContractorRoleRepository;
 
     @Override
     public ResponseDealDTO saveDeal(SaveOrUpdateDealDTO saveOrUpdateDealDTO) {
@@ -70,7 +74,7 @@ public class DealServiceImpl implements DealService {
         Deal deal = optionalDeal.orElse(null);
         List<DealContractor> contractors = contractorRepository.findAllByDealId(deal.getId());
         return ResponseDealWithContractorsDTO.toDTO(deal,
-                contractors.stream().map(ContractorDTO::toDTO).toList());
+                contractors.stream().map(contractor -> getDtoWithRoles(contractor, contractor.getId())).toList());
     }
 
     private void updateProperties(Deal existingDeal, Deal newDealData) {
@@ -84,6 +88,13 @@ public class DealServiceImpl implements DealService {
         existingDeal.setSum(newDealData.getSum());
         existingDeal.setCloseDt(newDealData.getCloseDt());
         existingDeal.setIsActive(newDealData.getIsActive());
+    }
+
+    private ContractorDTO getDtoWithRoles(DealContractor contractor, UUID id) {
+        ContractorDTO dto = ContractorDTO.toDTO(contractor);
+        List<ContractorRole> contractorRoles = dealContractorRoleRepository.findRolesByContractorId(id);
+        dto.setRoles(contractorRoles);
+        return dto;
     }
 
 }
