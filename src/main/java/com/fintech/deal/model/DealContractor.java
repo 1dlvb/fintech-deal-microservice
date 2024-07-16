@@ -2,6 +2,7 @@ package com.fintech.deal.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,32 +17,38 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "deal_contractor")
 public class DealContractor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "deal_id", nullable = false)
-    private Deal dealId;
+    private Deal deal;
 
     @Column(name = "contractor_id", nullable = false)
     private String contractorId;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "inn", nullable = false)
+    private String inn;
+
+    @Column(name = "main", nullable = false)
     private Boolean main = false;
 
     @CreatedDate
