@@ -19,7 +19,7 @@ public class ContractorController {
     private final ContractorService service;
 
     @PutMapping("/save")
-    public ResponseEntity<ContractorDTO> saveDeal(@RequestBody ContractorDTO contractorDTO) {
+    public ResponseEntity<ContractorDTO> saveContractor(@RequestBody ContractorDTO contractorDTO) {
         return ResponseEntity.ok(service.saveContractor(contractorDTO));
     }
 
