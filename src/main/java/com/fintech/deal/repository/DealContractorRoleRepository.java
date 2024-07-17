@@ -13,7 +13,7 @@ public interface DealContractorRoleRepository extends JpaRepository<DealContract
 
     @Query("SELECT cr FROM DealContractorRole dcr " +
             "JOIN dcr.contractorRole cr " +
-            "WHERE dcr.dealContractor.id = :contractorId")
+            "WHERE dcr.dealContractor.id = :contractorId AND dcr.isActive = true")
     List<ContractorRole> findRolesByContractorId(@Param("contractorId") UUID contractorId);
 
 }

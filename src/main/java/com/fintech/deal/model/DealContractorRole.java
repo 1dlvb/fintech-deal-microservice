@@ -1,5 +1,6 @@
 package com.fintech.deal.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,5 +30,8 @@ public class DealContractorRole {
     @ManyToOne
     @JoinColumn(name = "contractor_role_id")
     private ContractorRole contractorRole;
+
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
 
 }

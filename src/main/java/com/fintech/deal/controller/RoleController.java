@@ -3,11 +3,12 @@ package com.fintech.deal.controller;
 import com.fintech.deal.dto.ContractorDTO;
 import com.fintech.deal.dto.RoleDTO;
 import com.fintech.deal.exception.NotActiveException;
-import com.fintech.deal.model.ContractorRole;
 import com.fintech.deal.service.ContractorService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,6 +31,16 @@ public class RoleController {
         } catch (NotActiveException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<ContractorDTO> deleteRole(@PathVariable UUID id) {
+        try {
+            service.deleteRoleByDealContractorRoleId(id);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.noContent().build();
     }
 
 }

@@ -89,6 +89,18 @@ public class ContractorServiceImpl implements ContractorService {
         return getDtoWithRoles(contractor, id);
     }
 
+    @Override
+    public void deleteRoleByDealContractorRoleId(UUID id) {
+        Optional<DealContractorRole> roleOptional = dealContractorRoleRepository.findById(id);
+        DealContractorRole role = roleOptional.orElse(null);
+        if (role != null) {
+            role.setIsActive(false);
+            dealContractorRoleRepository.save(role);
+        } else {
+            throw new EntityNotFoundException("Role of contractor with ID: " + id + " not found.");
+        }
+    }
+
     private void updateProperties(DealContractor existingContractor, DealContractor newContractorData) {
         existingContractor.setDeal(newContractorData.getDeal());
         existingContractor.setContractorId(newContractorData.getContractorId());

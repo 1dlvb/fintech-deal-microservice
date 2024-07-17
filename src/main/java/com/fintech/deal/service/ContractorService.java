@@ -14,4 +14,6 @@ public interface ContractorService {
 
     ContractorDTO addRole(UUID id, RoleDTO roleDTO) throws NotActiveException;
 
+    void deleteRoleByDealContractorRoleId(UUID id);
+
 }
