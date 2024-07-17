@@ -26,7 +26,6 @@ public final class DealSpecification {
 
     public static Specification<Deal> searchDeals(SearchDealPayload payload) {
         return (root, query, criteriaBuilder) -> {
-//
             Stream<Predicate> predicateStream = Stream.of(
                     criteriaBuilder.isTrue(root.get("isActive")),
                     createEqualPredicate(criteriaBuilder, root, "id", payload.id()),
@@ -102,7 +101,6 @@ public final class DealSpecification {
         Join<Deal, DealContractor> contractor = root.join("dealContractors");
         Join<DealContractor, DealContractorRole> contractorRole = contractor.join("dealContractorRoles");
 
-        // Create list of predicates
         List<Predicate> orPredicates = new ArrayList<>();
         try {
             UUID uuid = UUID.fromString(searchValue);
