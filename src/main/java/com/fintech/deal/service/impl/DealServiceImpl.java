@@ -1,25 +1,31 @@
 package com.fintech.deal.service.impl;
 
 import com.fintech.deal.dto.ContractorDTO;
+import com.fintech.deal.dto.ContractorWithNoDealIdDTO;
 import com.fintech.deal.dto.ResponseDealDTO;
 import com.fintech.deal.dto.ChangeStatusOfDealDTO;
-import com.fintech.deal.dto.ResponseDealWithContractorsDTO;
+import com.fintech.deal.dto.DealWithContractorsDTO;
 import com.fintech.deal.dto.SaveOrUpdateDealDTO;
 import com.fintech.deal.model.ContractorRole;
 import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.DealStatus;
+import com.fintech.deal.payload.SearchDealPayload;
 import com.fintech.deal.repository.ContractorRepository;
 import com.fintech.deal.repository.DealContractorRoleRepository;
 import com.fintech.deal.repository.DealRepository;
+import com.fintech.deal.repository.specification.DealSpecification;
 import com.fintech.deal.service.DealService;
 import com.fintech.deal.service.StatusService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -69,12 +75,32 @@ public class DealServiceImpl implements DealService {
     }
 
     @Override
-    public ResponseDealWithContractorsDTO getDealWithContractorsById(UUID id) {
-        Optional<Deal> optionalDeal = repository.findById(id);
+    public DealWithContractorsDTO getDealWithContractorsById(UUID id) {
+        List<DealContractor> contractors = getListOfContractorsByDealId(id);
+        return DealWithContractorsDTO.toDTO(Objects.requireNonNull(repository.findById(id).orElse(null)),
+                contractors.stream().map(contractor -> getContractorDtoWithRoles(contractor, contractor.getId())).toList());
+    }
+
+    @Override
+    public List<DealContractor> getListOfContractorsByDealId(UUID dealID) {
+        Optional<Deal> optionalDeal = repository.findById(dealID);
         Deal deal = optionalDeal.orElse(null);
-        List<DealContractor> contractors = contractorRepository.findAllByDealId(deal.getId());
-        return ResponseDealWithContractorsDTO.toDTO(deal,
-                contractors.stream().map(contractor -> getDtoWithRoles(contractor, contractor.getId())).toList());
+        return contractorRepository.findAllByDealId(deal.getId());
+    }
+
+    @Override
+    public Page<DealWithContractorsDTO> searchDeals(SearchDealPayload payload, Pageable pageable) {
+        return repository.findAll(DealSpecification.searchDeals(payload), pageable)
+                .map(deal -> DealWithContractorsDTO.toDTO(deal, getListOfContractorsByDealId(deal.getId()).stream()
+                        .map(contractor -> {
+                            ContractorWithNoDealIdDTO dto = getContractorDtoWithRoles(contractor, contractor.getId());
+                            if (!dto.getRoles().isEmpty()) {
+                                return dto;
+                            }
+                            return null;
+                        })
+                        .filter(Objects::nonNull)
+                        .toList()));
     }
 
     private void updateProperties(Deal existingDeal, Deal newDealData) {
@@ -90,8 +116,8 @@ public class DealServiceImpl implements DealService {
         existingDeal.setIsActive(newDealData.getIsActive());
     }
 
-    private ContractorDTO getDtoWithRoles(DealContractor contractor, UUID id) {
-        ContractorDTO dto = ContractorDTO.toDTO(contractor);
+    private ContractorWithNoDealIdDTO getContractorDtoWithRoles(DealContractor contractor, UUID id) {
+        ContractorWithNoDealIdDTO dto = ContractorWithNoDealIdDTO.toDTO(contractor);
         List<ContractorRole> contractorRoles = dealContractorRoleRepository.findRolesByContractorId(id);
         dto.setRoles(contractorRoles);
         return dto;

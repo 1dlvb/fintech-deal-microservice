@@ -23,7 +23,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @JsonPropertyOrder({"id", "description", "agreement_number", "agreement_date", "agreement_start_dt",
         "availability_date", "type", "status", "sum", "close_dt", "contractors"})
-public class ResponseDealWithContractorsDTO {
+public class DealWithContractorsDTO {
 
     @JsonProperty("id")
     private UUID id;
@@ -60,9 +60,9 @@ public class ResponseDealWithContractorsDTO {
     private LocalDateTime closeDt;
 
     @JsonProperty("contractors")
-    private List<ContractorDTO> contractorDTOS;
+    private List<ContractorWithNoDealIdDTO> contractorDTOS;
 
-    public static Deal fromDTO(ResponseDealWithContractorsDTO responseDealDTO) {
+    public static Deal fromDTO(DealWithContractorsDTO responseDealDTO) {
 
         return Deal.builder()
                 .id(responseDealDTO.id)
@@ -79,8 +79,8 @@ public class ResponseDealWithContractorsDTO {
                 .build();
     }
 
-    public static ResponseDealWithContractorsDTO toDTO(Deal deal, List<ContractorDTO> contractorDTOList) {
-        return ResponseDealWithContractorsDTO.builder()
+    public static DealWithContractorsDTO toDTO(Deal deal, List<ContractorWithNoDealIdDTO> contractorDTOList) {
+        return DealWithContractorsDTO.builder()
                 .id(deal.getId())
                 .description(deal.getDescription())
                 .agreementNumber(deal.getAgreementNumber())
