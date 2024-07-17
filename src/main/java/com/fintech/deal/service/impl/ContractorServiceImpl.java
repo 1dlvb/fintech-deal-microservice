@@ -86,7 +86,7 @@ public class ContractorServiceImpl implements ContractorService {
         dealContractorRole.setContractorRole(role);
         dealContractorRoleRepository.save(dealContractorRole);
 
-        return getDtoWithRoles(contractor, id);
+        return getDtoWithRoles(contractor, contractor.getId());
     }
 
     @Override
