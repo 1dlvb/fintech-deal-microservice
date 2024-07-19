@@ -40,18 +40,20 @@ public class ContractorServiceImpl implements ContractorService {
     @Override
     @Transactional
     public ContractorDTO saveContractor(ContractorDTO contractorDTO) {
-
         DealContractor contractor = ContractorDTO.fromDTO(contractorDTO, dealService);
+
         if (contractor.getMain() && repository.existsByDealIdAndMainTrue(contractor.getDeal().getId())) {
             throw new IllegalStateException("Only one record can have main = true for each deal_id");
         }
-        if (contractor.getId() != null && repository.existsById(contractor.getId())) {
-            DealContractor existingContractor = repository.findById(contractor.getId()).orElse(null);
-            if (existingContractor != null) {
-                    updateProperties(existingContractor, contractor);
-                    contractor = repository.save(existingContractor);
-            }
 
+        Optional<DealContractor> existingContractorOpt =
+                repository.findByDealIdAndContractorId(contractor.getDeal().getId(), contractor.getContractorId());
+
+
+        if (existingContractorOpt.isPresent()) {
+            DealContractor existingContractor = existingContractorOpt.get();
+            updateProperties(existingContractor, contractor);
+            contractor = repository.save(existingContractor);
         } else {
             contractor = repository.save(contractor);
         }
