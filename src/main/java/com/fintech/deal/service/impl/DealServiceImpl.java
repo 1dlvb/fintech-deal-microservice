@@ -63,21 +63,37 @@ public class DealServiceImpl implements DealService {
 
     @Override
     public ResponseDealDTO changeStatus(ChangeStatusOfDealDTO changeStatusOfDealDTO) {
+        String dealOldId;
+        String dealNewId;
         UUID id = changeStatusOfDealDTO.getId();
+
         DealStatus status = statusService.getStatusById(changeStatusOfDealDTO.getStatus().getId());
         Optional<Deal> dealOptional = repository.findById(id);
         Deal deal = dealOptional.orElseThrow(() -> new EntityNotFoundException("Deal not found for ID: " + id));
+
+        dealOldId = deal.getStatus().getId();
         deal.setStatus(status);
+        dealNewId = deal.getStatus().getId();
         repository.save(deal);
-        List<DealContractor> dealContractors = contractorRepository.findAllByDealId(deal.getId());
-        for (DealContractor dc: dealContractors) {
-            if (contractorRepository.countDealsWithStatusActiveByContractorId(dc.getContractorId()) == 1
-            && dc.getMain()) {
-                feignClient.updateActiveMainBorrower(new MainBorrowerDTO(dc.getContractorId(), true));
+
+            List<DealContractor> dealContractors = contractorRepository.findAllByDealId(deal.getId());
+            for (DealContractor dc: dealContractors) {
+                if (dealOldId.equals("DRAFT") && dealNewId.equals("ACTIVE")) {
+                    updateActiveMainBorrowerInContractorService(dc, "ACTIVE", true);
+                } else if (dealOldId.equals("ACTIVE") && dealNewId.equals("CLOSED")) {
+                    updateActiveMainBorrowerInContractorService(dc, "CLOSED", false);
+
+                }
             }
-        }
 
         return ResponseDealDTO.toDTO(deal);
+    }
+
+    private void updateActiveMainBorrowerInContractorService(DealContractor dc, String status, boolean hasMainDeals) {
+        if (contractorRepository.countDealsWithStatusActiveByContractorId(dc.getContractorId(), status) == 1
+        && dc.getMain()) {
+            feignClient.updateActiveMainBorrower(new MainBorrowerDTO(dc.getContractorId(), hasMainDeals));
+        }
     }
 
     @Override
