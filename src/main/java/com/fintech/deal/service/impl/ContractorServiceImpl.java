@@ -13,6 +13,7 @@ import com.fintech.deal.repository.DealContractorRoleRepository;
 import com.fintech.deal.service.ContractorService;
 import com.fintech.deal.service.DealService;
 import com.fintech.deal.service.RoleService;
+import com.fintech.deal.util.OutboxMessageManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
@@ -41,6 +42,9 @@ public class ContractorServiceImpl implements ContractorService {
 
     @NonNull
     private final ContractorFeignClient feignClient;
+
+    @NonNull
+    private final OutboxMessageManager outboxMessageManager;
 
     @Override
     @Transactional
@@ -129,6 +133,7 @@ public class ContractorServiceImpl implements ContractorService {
     private void updateActiveMainBorrowerInContractorService(DealContractor contractor, boolean hasMainDeals) {
         if (contractor.getMain() && repository.existsOtherDealsByContractorWhereMainIsTrueId(contractor.getContractorId())) {
             feignClient.updateActiveMainBorrower(new MainBorrowerDTO(contractor.getContractorId(), hasMainDeals));
+            outboxMessageManager.updateMainBorrower(contractor, hasMainDeals);
         }
     }
 

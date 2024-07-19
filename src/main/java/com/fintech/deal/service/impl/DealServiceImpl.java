@@ -1,12 +1,10 @@
 package com.fintech.deal.service.impl;
 
 import com.fintech.deal.dto.ContractorWithNoDealIdDTO;
-import com.fintech.deal.dto.MainBorrowerDTO;
 import com.fintech.deal.dto.ResponseDealDTO;
 import com.fintech.deal.dto.ChangeStatusOfDealDTO;
 import com.fintech.deal.dto.DealWithContractorsDTO;
 import com.fintech.deal.dto.SaveOrUpdateDealDTO;
-import com.fintech.deal.feign.ContractorFeignClient;
 import com.fintech.deal.model.ContractorRole;
 import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
@@ -18,6 +16,7 @@ import com.fintech.deal.repository.DealRepository;
 import com.fintech.deal.repository.specification.DealSpecification;
 import com.fintech.deal.service.DealService;
 import com.fintech.deal.service.StatusService;
+import com.fintech.deal.util.OutboxMessageManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -36,14 +35,18 @@ public class DealServiceImpl implements DealService {
 
     @NonNull
     private final DealRepository repository;
+
     @NonNull
     private final ContractorRepository contractorRepository;
+
     @NonNull
     private final StatusService statusService;
+
     @NonNull
     private final DealContractorRoleRepository dealContractorRoleRepository;
+
     @NonNull
-    private final ContractorFeignClient feignClient;
+    private final OutboxMessageManager outboxMessageManager;
 
     @Override
     public ResponseDealDTO saveDeal(SaveOrUpdateDealDTO saveOrUpdateDealDTO) {
@@ -63,28 +66,25 @@ public class DealServiceImpl implements DealService {
 
     @Override
     public ResponseDealDTO changeStatus(ChangeStatusOfDealDTO changeStatusOfDealDTO) {
-        String dealOldId;
-        String dealNewId;
         UUID id = changeStatusOfDealDTO.getId();
 
         DealStatus status = statusService.getStatusById(changeStatusOfDealDTO.getStatus().getId());
         Optional<Deal> dealOptional = repository.findById(id);
         Deal deal = dealOptional.orElseThrow(() -> new EntityNotFoundException("Deal not found for ID: " + id));
 
-        dealOldId = deal.getStatus().getId();
+        String dealOldStatus = deal.getStatus().getId();
         deal.setStatus(status);
-        dealNewId = deal.getStatus().getId();
+
         repository.save(deal);
+        List<DealContractor> dealContractors = contractorRepository.findAllByDealId(deal.getId());
+        for (DealContractor dc: dealContractors) {
+            if (dealOldStatus.equals("DRAFT") && status.getId().equals("ACTIVE")) {
+                updateActiveMainBorrowerInContractorService(dc, "ACTIVE", true);
+            } else if (dealOldStatus.equals("ACTIVE") && status.getId().equals("CLOSED")) {
+                updateActiveMainBorrowerInContractorService(dc, "CLOSED", false);
 
-            List<DealContractor> dealContractors = contractorRepository.findAllByDealId(deal.getId());
-            for (DealContractor dc: dealContractors) {
-                if (dealOldId.equals("DRAFT") && dealNewId.equals("ACTIVE")) {
-                    updateActiveMainBorrowerInContractorService(dc, "ACTIVE", true);
-                } else if (dealOldId.equals("ACTIVE") && dealNewId.equals("CLOSED")) {
-                    updateActiveMainBorrowerInContractorService(dc, "CLOSED", false);
-
-                }
             }
+        }
 
         return ResponseDealDTO.toDTO(deal);
     }
@@ -146,7 +146,7 @@ public class DealServiceImpl implements DealService {
     private void updateActiveMainBorrowerInContractorService(DealContractor dc, String status, boolean hasMainDeals) {
         if (contractorRepository.countDealsWithStatusActiveByContractorId(dc.getContractorId(), status) == 1
                 && dc.getMain()) {
-            feignClient.updateActiveMainBorrower(new MainBorrowerDTO(dc.getContractorId(), hasMainDeals));
+            outboxMessageManager.updateMainBorrower(dc, hasMainDeals);
         }
     }
 

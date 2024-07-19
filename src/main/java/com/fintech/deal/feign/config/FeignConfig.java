@@ -29,10 +29,5 @@ public class FeignConfig {
         CloseableHttpClient httpClient = HttpClients.custom().build();
         return new feign.httpclient.ApacheHttpClient(httpClient);
     }
-//
-//    @Bean
-//    public ErrorDecoder errorDecoder() {
-//        return new CustomErrorDecoder();
-//    }
 
 }
