@@ -20,8 +20,8 @@ public interface ContractorRepository extends JpaRepository<DealContractor, UUID
     @Query("SELECT c FROM DealContractor c WHERE c.deal.id = :dealId AND c.isActive = true")
     List<DealContractor> findAllByDealId(@Param("dealId") UUID dealId);
 
-    @Query("SELECT d FROM Deal d JOIN d.dealContractors c WHERE c.contractorId = :contractorId AND d.isActive = true")
-    List<Deal> findAllDealsByContractorId(@Param("contractorId") String contractorId);
+    @Query("SELECT COUNT (d) = 1 FROM Deal d JOIN d.dealContractors c WHERE c.contractorId = :contractorId AND d.isActive = true AND c.main=true ")
+    boolean existsOtherDealsByContractorWhereMainIsTrueId(@Param("contractorId") String contractorId);
 
     @Query("SELECT COUNT(d) FROM Deal d JOIN d.dealContractors c WHERE c.contractorId = :contractorId AND d.status.id = :status AND d.isActive = true")
     Integer countDealsWithStatusActiveByContractorId(@Param("contractorId") String contractorId, @Param("status") String status);

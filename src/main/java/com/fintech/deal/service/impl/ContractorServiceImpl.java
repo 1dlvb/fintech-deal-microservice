@@ -1,8 +1,10 @@
 package com.fintech.deal.service.impl;
 
 import com.fintech.deal.dto.ContractorDTO;
+import com.fintech.deal.dto.MainBorrowerDTO;
 import com.fintech.deal.dto.RoleDTO;
 import com.fintech.deal.exception.NotActiveException;
+import com.fintech.deal.feign.ContractorFeignClient;
 import com.fintech.deal.model.ContractorRole;
 import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.DealContractorRole;
@@ -36,6 +38,9 @@ public class ContractorServiceImpl implements ContractorService {
 
     @NonNull
     private final DealContractorRoleRepository dealContractorRoleRepository;
+
+    @NonNull
+    private final ContractorFeignClient feignClient;
 
     @Override
     @Transactional
@@ -72,6 +77,8 @@ public class ContractorServiceImpl implements ContractorService {
         } else {
             throw new NotActiveException("Contractor is not active");
         }
+
+        updateActiveMainBorrowerInContractorService(contractor, false);
     }
 
     @Override
@@ -117,6 +124,12 @@ public class ContractorServiceImpl implements ContractorService {
         List<ContractorRole> contractorRoles = dealContractorRoleRepository.findRolesByContractorId(id);
         dto.setRoles(contractorRoles);
         return dto;
+    }
+
+    private void updateActiveMainBorrowerInContractorService(DealContractor contractor, boolean hasMainDeals) {
+        if (contractor.getMain() && repository.existsOtherDealsByContractorWhereMainIsTrueId(contractor.getContractorId())) {
+            feignClient.updateActiveMainBorrower(new MainBorrowerDTO(contractor.getContractorId(), hasMainDeals));
+        }
     }
 
 }
