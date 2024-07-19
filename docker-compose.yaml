@@ -3,7 +3,7 @@ services:
     image: 'postgres:latest'
     container_name: "deal_postgres"
     ports:
-      - '5432:5432'
+      - '5433:5432'
     env_file:
       - .env
     environment:
