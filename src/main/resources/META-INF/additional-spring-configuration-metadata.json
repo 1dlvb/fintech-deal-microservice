@@ -14,5 +14,10 @@
       "name": "audit-lib-spring-boot-starter.file-path",
       "type": "java.lang.String",
       "description": "Path for logging file."
+    },
+    {
+      "name": "contractor.service.url",
+      "type": "java.lang.String",
+      "description": "An url for contractor microservice."
     }
   ] }
