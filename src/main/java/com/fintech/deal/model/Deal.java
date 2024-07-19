@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -88,6 +89,7 @@ public class Deal {
     private Boolean isActive = true;
 
     @OneToMany(mappedBy = "deal")
+    @ToString.Exclude
     private List<DealContractor> dealContractors;
 
 }
