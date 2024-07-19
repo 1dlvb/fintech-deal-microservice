@@ -21,7 +21,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,11 +56,11 @@ public class DealContractor {
 
     @CreatedDate
     @Column(name = "create_date", nullable = false)
-    private LocalDate createDate;
+    private LocalDateTime createDate;
 
     @LastModifiedDate
     @Column(name = "modify_date")
-    private LocalDate modifyDate;
+    private LocalDateTime modifyDate;
 
     @CreatedBy
     @Column(name = "create_user_id")
