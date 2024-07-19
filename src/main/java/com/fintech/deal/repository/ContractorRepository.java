@@ -1,6 +1,5 @@
 package com.fintech.deal.repository;
 
-import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
