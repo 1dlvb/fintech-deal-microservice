@@ -89,13 +89,6 @@ public class DealServiceImpl implements DealService {
         return ResponseDealDTO.toDTO(deal);
     }
 
-    private void updateActiveMainBorrowerInContractorService(DealContractor dc, String status, boolean hasMainDeals) {
-        if (contractorRepository.countDealsWithStatusActiveByContractorId(dc.getContractorId(), status) == 1
-        && dc.getMain()) {
-            feignClient.updateActiveMainBorrower(new MainBorrowerDTO(dc.getContractorId(), hasMainDeals));
-        }
-    }
-
     @Override
     public Deal getDealById(UUID id) {
         return repository.findById(id).orElse(null);
@@ -112,7 +105,7 @@ public class DealServiceImpl implements DealService {
     public List<DealContractor> getListOfContractorsByDealId(UUID dealID) {
         Optional<Deal> optionalDeal = repository.findById(dealID);
         Deal deal = optionalDeal.orElse(null);
-        return contractorRepository.findAllByDealId(deal.getId());
+        return contractorRepository.findAllByDealId(Objects.requireNonNull(deal).getId());
     }
 
     @Override
@@ -148,6 +141,13 @@ public class DealServiceImpl implements DealService {
         List<ContractorRole> contractorRoles = dealContractorRoleRepository.findRolesByContractorId(id);
         dto.setRoles(contractorRoles);
         return dto;
+    }
+
+    private void updateActiveMainBorrowerInContractorService(DealContractor dc, String status, boolean hasMainDeals) {
+        if (contractorRepository.countDealsWithStatusActiveByContractorId(dc.getContractorId(), status) == 1
+                && dc.getMain()) {
+            feignClient.updateActiveMainBorrower(new MainBorrowerDTO(dc.getContractorId(), hasMainDeals));
+        }
     }
 
 }
