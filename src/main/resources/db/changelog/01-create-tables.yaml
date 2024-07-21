@@ -69,10 +69,10 @@ databaseChangeLog:
                   type: date
               - column:
                   name: type
-                  type: uuid
+                  type: varchar(255)
               - column:
                   name: status
-                  type: uuid
+                  type: varchar(255)
                   constraints:
                     nullable: false
               - column:
@@ -83,12 +83,12 @@ databaseChangeLog:
                   type: timestamp
               - column:
                   name: create_date
-                  type: date
+                  type: timestamp
                   constraints:
                     nullable: false
               - column:
                   name: modify_date
-                  type: date
+                  type: timestamp
               - column:
                   name: create_user_id
                   type: varchar(255)
@@ -127,11 +127,16 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: contractor_id
-                  type: uuid
+                  type: varchar(255)
                   constraints:
                     nullable: false
               - column:
                   name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: inn
                   type: varchar(255)
                   constraints:
                     nullable: false
@@ -143,12 +148,12 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: create_date
-                  type: date
+                  type: timestamp
                   constraints:
                     nullable: false
               - column:
                   name: modify_date
-                  type: date
+                  type: timestamp
               - column:
                   name: create_user_id
                   type: varchar(255)
@@ -223,3 +228,91 @@ databaseChangeLog:
                   defaultValueBoolean: true
                   constraints:
                     nullable: false
+  - changeSet:
+      id: 6
+      author: matushkin
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: contractor_outbox_message
+      changes:
+        - createTable:
+            tableName: contractor_outbox_message
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: content
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: contractor_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: active_main_borrower
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: sent
+                  type: boolean
+                  constraints:
+                    nullable: false
+                  defaultValueBoolean: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+  - changeSet:
+      id: 7
+      author: matushkin
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: deal_contractor_role
+      changes:
+        - createTable:
+            tableName: deal_contractor_role
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: deal_contractor_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: contractor_role_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_active
+                  type: boolean
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: deal_contractor_role
+            columnNames: deal_contractor_id, contractor_role_id
+            constraintName: uk_deal_contractor_role
