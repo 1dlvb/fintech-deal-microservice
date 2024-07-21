@@ -14,9 +14,10 @@ import com.fintech.deal.repository.ContractorRepository;
 import com.fintech.deal.repository.DealContractorRoleRepository;
 import com.fintech.deal.repository.DealRepository;
 import com.fintech.deal.repository.specification.DealSpecification;
+import com.fintech.deal.service.ContractorOutboxService;
 import com.fintech.deal.service.DealService;
 import com.fintech.deal.service.StatusService;
-import com.fintech.deal.util.OutboxMessageManager;
+import com.fintech.deal.util.WhenUpdateMainBorrowerInvoked;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public class DealServiceImpl implements DealService {
     private final DealContractorRoleRepository dealContractorRoleRepository;
 
     @NonNull
-    private final OutboxMessageManager outboxMessageManager;
+    private final ContractorOutboxService outboxService;
 
     @Override
     public ResponseDealDTO saveDeal(SaveOrUpdateDealDTO saveOrUpdateDealDTO) {
@@ -74,7 +75,6 @@ public class DealServiceImpl implements DealService {
 
         String dealOldStatus = deal.getStatus().getId();
         deal.setStatus(status);
-
         repository.save(deal);
         List<DealContractor> dealContractors = contractorRepository.findAllByDealId(deal.getId());
         for (DealContractor dc: dealContractors) {
@@ -82,7 +82,6 @@ public class DealServiceImpl implements DealService {
                 updateActiveMainBorrowerInContractorService(dc, "ACTIVE", true);
             } else if (dealOldStatus.equals("ACTIVE") && status.getId().equals("CLOSED")) {
                 updateActiveMainBorrowerInContractorService(dc, "CLOSED", false);
-
             }
         }
 
@@ -146,7 +145,11 @@ public class DealServiceImpl implements DealService {
     private void updateActiveMainBorrowerInContractorService(DealContractor dc, String status, boolean hasMainDeals) {
         if (contractorRepository.countDealsWithStatusActiveByContractorId(dc.getContractorId(), status) == 1
                 && dc.getMain()) {
-            outboxMessageManager.updateMainBorrower(dc, hasMainDeals);
+            if (status.equals("ACTIVE")) {
+                outboxService.updateMainBorrower(dc, hasMainDeals, WhenUpdateMainBorrowerInvoked.ON_UPDATE_STATUS_ACTIVE);
+            } else if (status.equals("CLOSED")) {
+                outboxService.updateMainBorrower(dc, hasMainDeals, WhenUpdateMainBorrowerInvoked.ON_UPDATE_STATUS_CLOSED);
+            }
         }
     }
 
