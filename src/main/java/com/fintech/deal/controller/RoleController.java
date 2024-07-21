@@ -4,6 +4,8 @@ import com.fintech.deal.dto.ContractorDTO;
 import com.fintech.deal.dto.RoleDTO;
 import com.fintech.deal.exception.NotActiveException;
 import com.fintech.deal.service.ContractorService;
+import com.onedlvb.advice.LogLevel;
+import com.onedlvb.advice.annotation.AuditLogHttp;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class RoleController {
     @NonNull
     private final ContractorService service;
     @PostMapping("/add/{id}")
+    @AuditLogHttp(logLevel = LogLevel.INFO)
     public ResponseEntity<ContractorDTO> addRole(@PathVariable UUID id, @RequestBody RoleDTO roleDTO) {
         try {
             return ResponseEntity.ok(service.addRole(id, roleDTO));
@@ -34,6 +37,7 @@ public class RoleController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @AuditLogHttp(logLevel = LogLevel.INFO)
     public ResponseEntity<ContractorDTO> deleteRole(@PathVariable UUID id) {
         try {
             service.deleteRoleByDealContractorRoleId(id);

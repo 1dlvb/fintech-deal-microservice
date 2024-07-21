@@ -18,6 +18,8 @@ import com.fintech.deal.service.ContractorOutboxService;
 import com.fintech.deal.service.DealService;
 import com.fintech.deal.service.StatusService;
 import com.fintech.deal.util.WhenUpdateMainBorrowerInvoked;
+import com.onedlvb.advice.LogLevel;
+import com.onedlvb.advice.annotation.AuditLog;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +52,7 @@ public class DealServiceImpl implements DealService {
     private final ContractorOutboxService outboxService;
 
     @Override
+    @AuditLog(logLevel = LogLevel.INFO)
     public ResponseDealDTO saveDeal(SaveOrUpdateDealDTO saveOrUpdateDealDTO) {
         Deal deal = SaveOrUpdateDealDTO.fromDTO(saveOrUpdateDealDTO);
         deal.setStatus(statusService.getStatusById("DRAFT"));
@@ -66,6 +69,7 @@ public class DealServiceImpl implements DealService {
     }
 
     @Override
+    @AuditLog(logLevel = LogLevel.INFO)
     public ResponseDealDTO changeStatus(ChangeStatusOfDealDTO changeStatusOfDealDTO) {
         UUID id = changeStatusOfDealDTO.getId();
 
@@ -89,11 +93,13 @@ public class DealServiceImpl implements DealService {
     }
 
     @Override
+    @AuditLog(logLevel = LogLevel.INFO)
     public Deal getDealById(UUID id) {
         return repository.findById(id).orElse(null);
     }
 
     @Override
+    @AuditLog(logLevel = LogLevel.INFO)
     public DealWithContractorsDTO getDealWithContractorsById(UUID id) {
         List<DealContractor> contractors = getListOfContractorsByDealId(id);
         return DealWithContractorsDTO.toDTO(Objects.requireNonNull(repository.findById(id).orElse(null)),
@@ -101,6 +107,7 @@ public class DealServiceImpl implements DealService {
     }
 
     @Override
+    @AuditLog(logLevel = LogLevel.INFO)
     public List<DealContractor> getListOfContractorsByDealId(UUID dealID) {
         Optional<Deal> optionalDeal = repository.findById(dealID);
         Deal deal = optionalDeal.orElse(null);
@@ -108,6 +115,7 @@ public class DealServiceImpl implements DealService {
     }
 
     @Override
+    @AuditLog(logLevel = LogLevel.INFO)
     public Page<DealWithContractorsDTO> searchDeals(SearchDealPayload payload, Pageable pageable) {
         return repository.findAll(DealSpecification.searchDeals(payload), pageable)
                 .map(deal -> DealWithContractorsDTO.toDTO(deal, getListOfContractorsByDealId(deal.getId()).stream()

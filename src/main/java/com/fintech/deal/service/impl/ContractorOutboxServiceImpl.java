@@ -9,6 +9,8 @@ import com.fintech.deal.model.ContractorOutboxMessage;
 import com.fintech.deal.repository.ContractorOutboxRepository;
 import com.fintech.deal.service.ContractorOutboxService;
 import com.fintech.deal.util.WhenUpdateMainBorrowerInvoked;
+import com.onedlvb.advice.LogLevel;
+import com.onedlvb.advice.annotation.AuditLog;
 import feign.FeignException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +30,7 @@ public final class ContractorOutboxServiceImpl implements ContractorOutboxServic
 
     @NonNull
     private ContractorOutboxRepository repository;
-
+    @AuditLog(logLevel = LogLevel.INFO)
     public void updateMainBorrower(DealContractor contractor, boolean hasMainDeals,
                                    WhenUpdateMainBorrowerInvoked whenInvoked) {
         ContractorOutboxMessage contractorOutboxMessage = new ContractorOutboxMessage();
@@ -55,6 +57,7 @@ public final class ContractorOutboxServiceImpl implements ContractorOutboxServic
         repository.save(contractorOutboxMessage);
     }
 
+    @AuditLog(logLevel = LogLevel.INFO)
     public void resendFailedMessage() {
         List<ContractorOutboxMessage> failedMessages = repository.findBySentFalse();
         Collections.reverse(failedMessages);
@@ -71,6 +74,7 @@ public final class ContractorOutboxServiceImpl implements ContractorOutboxServic
         }
     }
 
+    @AuditLog(logLevel = LogLevel.INFO)
     public Boolean shouldResend(String contractorId, ContractorOutboxMessage message) {
         Deal deal = repository.findDealsByContractorId(contractorId);
         if (deal.getStatus().getId().equals("CLOSED")

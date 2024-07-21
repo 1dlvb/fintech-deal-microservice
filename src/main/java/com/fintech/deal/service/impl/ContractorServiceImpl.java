@@ -13,6 +13,8 @@ import com.fintech.deal.service.ContractorService;
 import com.fintech.deal.service.DealService;
 import com.fintech.deal.service.RoleService;
 import com.fintech.deal.util.WhenUpdateMainBorrowerInvoked;
+import com.onedlvb.advice.LogLevel;
+import com.onedlvb.advice.annotation.AuditLog;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
@@ -44,6 +46,7 @@ public class ContractorServiceImpl implements ContractorService {
 
     @Override
     @Transactional
+    @AuditLog(logLevel = LogLevel.INFO)
     public ContractorDTO saveContractor(ContractorDTO contractorDTO) {
         DealContractor contractor = ContractorDTO.fromDTO(contractorDTO, dealService);
 
@@ -67,6 +70,7 @@ public class ContractorServiceImpl implements ContractorService {
 
     @Override
     @Transactional
+    @AuditLog(logLevel = LogLevel.INFO)
     public void deleteContractor(UUID id) throws NotActiveException {
         Optional<DealContractor> contractorOptional = repository.findById(id);
         DealContractor contractor = contractorOptional.orElseThrow(() ->
@@ -82,6 +86,7 @@ public class ContractorServiceImpl implements ContractorService {
     }
 
     @Override
+    @AuditLog(logLevel = LogLevel.INFO)
     public ContractorDTO addRole(UUID id, RoleDTO roleDTO) {
         Optional<DealContractor> contractorOptional = repository.findById(id);
         DealContractor contractor = contractorOptional.orElseThrow(() ->
@@ -99,6 +104,7 @@ public class ContractorServiceImpl implements ContractorService {
     }
 
     @Override
+    @AuditLog(logLevel = LogLevel.INFO)
     public void deleteRoleByDealContractorRoleId(UUID id) {
         Optional<DealContractorRole> roleOptional = dealContractorRoleRepository.findById(id);
         DealContractorRole role = roleOptional.orElse(null);

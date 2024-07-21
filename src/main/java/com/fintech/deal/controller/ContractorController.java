@@ -3,6 +3,8 @@ package com.fintech.deal.controller;
 import com.fintech.deal.dto.ContractorDTO;
 import com.fintech.deal.exception.NotActiveException;
 import com.fintech.deal.service.ContractorService;
+import com.onedlvb.advice.LogLevel;
+import com.onedlvb.advice.annotation.AuditLogHttp;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +26,13 @@ public class ContractorController {
     private final ContractorService service;
 
     @PutMapping("/save")
+    @AuditLogHttp(logLevel = LogLevel.INFO)
     public ResponseEntity<ContractorDTO> saveContractor(@RequestBody ContractorDTO contractorDTO) {
         return ResponseEntity.ok(service.saveContractor(contractorDTO));
     }
 
     @DeleteMapping("/delete/{id}")
+    @AuditLogHttp(logLevel = LogLevel.INFO)
     public ResponseEntity<ContractorDTO> saveDeal(@PathVariable UUID id) {
         try {
             service.deleteContractor(id);
