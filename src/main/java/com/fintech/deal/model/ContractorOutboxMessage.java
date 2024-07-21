@@ -18,8 +18,8 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "outbox_message")
-public class OutboxMessage {
+@Table(name = "contractor_outbox_message")
+public class ContractorOutboxMessage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +27,12 @@ public class OutboxMessage {
 
     @Column(nullable = false)
     private String content;
+
+    @Column(nullable = false, name = "contractor_id")
+    private String contractorId;
+
+    @Column(nullable = false, name = "active_main_borrower")
+    private boolean activeMainBorrower;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

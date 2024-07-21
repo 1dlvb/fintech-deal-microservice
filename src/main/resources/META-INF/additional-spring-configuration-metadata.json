@@ -19,5 +19,10 @@
       "name": "contractor.service.url",
       "type": "java.lang.String",
       "description": "An url for contractor microservice."
+    },
+    {
+      "name": "deal.resend.failed.message.cron",
+      "type": "java.lang.String",
+      "description": "A cron expression for resending failed messages."
     }
   ] }

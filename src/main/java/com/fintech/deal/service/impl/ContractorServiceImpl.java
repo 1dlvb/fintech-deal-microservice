@@ -1,19 +1,18 @@
 package com.fintech.deal.service.impl;
 
 import com.fintech.deal.dto.ContractorDTO;
-import com.fintech.deal.dto.MainBorrowerDTO;
 import com.fintech.deal.dto.RoleDTO;
 import com.fintech.deal.exception.NotActiveException;
-import com.fintech.deal.feign.ContractorFeignClient;
 import com.fintech.deal.model.ContractorRole;
 import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.DealContractorRole;
 import com.fintech.deal.repository.ContractorRepository;
 import com.fintech.deal.repository.DealContractorRoleRepository;
+import com.fintech.deal.service.ContractorOutboxService;
 import com.fintech.deal.service.ContractorService;
 import com.fintech.deal.service.DealService;
 import com.fintech.deal.service.RoleService;
-import com.fintech.deal.util.OutboxMessageManager;
+import com.fintech.deal.util.WhenUpdateMainBorrowerInvoked;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
@@ -41,10 +40,7 @@ public class ContractorServiceImpl implements ContractorService {
     private final DealContractorRoleRepository dealContractorRoleRepository;
 
     @NonNull
-    private final ContractorFeignClient feignClient;
-
-    @NonNull
-    private final OutboxMessageManager outboxMessageManager;
+    private final ContractorOutboxService outboxService;
 
     @Override
     @Transactional
@@ -132,8 +128,7 @@ public class ContractorServiceImpl implements ContractorService {
 
     private void updateActiveMainBorrowerInContractorService(DealContractor contractor, boolean hasMainDeals) {
         if (contractor.getMain() && repository.existsOtherDealsByContractorWhereMainIsTrueId(contractor.getContractorId())) {
-            feignClient.updateActiveMainBorrower(new MainBorrowerDTO(contractor.getContractorId(), hasMainDeals));
-            outboxMessageManager.updateMainBorrower(contractor, hasMainDeals);
+            outboxService.updateMainBorrower(contractor, hasMainDeals, WhenUpdateMainBorrowerInvoked.ON_DELETE);
         }
     }
 
