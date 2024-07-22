@@ -35,7 +35,6 @@ public record SearchDealPayload(
     @JsonProperty("close_dt_to")
     @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     LocalDateTime closeDtTo,
-    String contractorSearchValue,
-    String group
+    String contractorSearchValue
 
 ){}

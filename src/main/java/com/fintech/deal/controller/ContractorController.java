@@ -33,7 +33,7 @@ public class ContractorController {
 
     @DeleteMapping("/delete/{id}")
     @AuditLogHttp(logLevel = LogLevel.INFO)
-    public ResponseEntity<ContractorDTO> saveDeal(@PathVariable UUID id) {
+    public ResponseEntity<ContractorDTO> deleteContractor(@PathVariable UUID id) {
         try {
             service.deleteContractor(id);
         } catch (NotActiveException e) {

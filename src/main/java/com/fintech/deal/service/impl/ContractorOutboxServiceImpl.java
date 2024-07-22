@@ -22,7 +22,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public final class ContractorOutboxServiceImpl implements ContractorOutboxService {
+public class ContractorOutboxServiceImpl implements ContractorOutboxService {
 
 
     @NonNull
