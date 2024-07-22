@@ -147,7 +147,7 @@ class ContractorOutboxServiceImplTests {
         boolean result = contractorOutboxService.shouldResend(contractorId, message);
 
         assertTrue(result);
-        assertTrue(!message.isSent());
+        assertFalse(message.isSent());
         assertThat(message.getStatus()).isEqualTo(MessageStatus.FAILED);
 
     }
