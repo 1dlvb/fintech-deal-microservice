@@ -20,6 +20,10 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * An implementation of {@link ContractorOutboxService}
+ * @author Matushkin Anton
+ */
 @Service
 @RequiredArgsConstructor
 public class ContractorOutboxServiceImpl implements ContractorOutboxService {

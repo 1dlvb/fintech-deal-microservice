@@ -32,6 +32,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+
+/**
+ * An implementation of {@link DealService}
+ * @author Matushkin Anton
+ */
 @Service
 @RequiredArgsConstructor
 public class DealServiceImpl implements DealService {

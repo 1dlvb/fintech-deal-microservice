@@ -13,6 +13,11 @@ import lombok.Data;
 
 import java.util.UUID;
 
+/**
+ * Entity class representing a deal contactor role.
+ * This class maps to the "deal_contractor_role" table in the database.
+ * @author Matushkin Anton
+ */
 @Data
 @Entity
 @Table(name = "deal_contractor_role", uniqueConstraints = {

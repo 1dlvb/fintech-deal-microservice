@@ -9,6 +9,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entity class representing a deal status.
+ * This class maps to the "deal_status" table in the database.
+ * @author Matushkin Anton
+ */
 @Entity
 @Data
 @Builder

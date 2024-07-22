@@ -1,5 +1,9 @@
 package com.fintech.deal.util;
 
+/**
+ * An enum for Main Borrower Status in messages
+ * @author Matushkin Anton
+ */
 public enum WhenUpdateMainBorrowerInvoked {
 
     ON_DELETE,

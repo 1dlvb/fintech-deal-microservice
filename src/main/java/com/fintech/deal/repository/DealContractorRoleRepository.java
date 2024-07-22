@@ -9,6 +9,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Repository for {@link DealContractorRole} entities.
+ * @author Matushkin Anton
+ */
 public interface DealContractorRoleRepository extends JpaRepository<DealContractorRole, UUID> {
 
     @Query("SELECT cr FROM DealContractorRole dcr " +

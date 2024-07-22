@@ -8,6 +8,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Repository for {@link ContractorOutboxMessage} entities.
+ * @author Matushkin Anton
+ */
 @Repository
 public interface ContractorOutboxRepository extends JpaRepository<ContractorOutboxMessage, Long> {
 

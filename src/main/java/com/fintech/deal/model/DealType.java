@@ -9,6 +9,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entity class representing a deal type.
+ * This class maps to the "deal_type" table in the database.
+ * @author Matushkin Anton
+ */
 @Entity
 @Data
 @Builder

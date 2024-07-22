@@ -9,6 +9,11 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+
+/**
+ * An implementation of {@link RoleService}
+ * @author Matushkin Anton
+ */
 @Service
 @RequiredArgsConstructor
 public class RoleServiceImpl implements RoleService {

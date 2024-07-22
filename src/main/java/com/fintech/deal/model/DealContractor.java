@@ -25,6 +25,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Entity class representing a deal contractor.
+ * This class maps to the "deal_contractor" table in the database.
+ * It includes basic information about a contractor entity and audit-related fields.
+ * @author Matushkin Anton
+ */
 @Entity
 @Data
 @Builder

@@ -14,6 +14,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity class representing a contractor outbox messages.
+ * This class maps to the "contractor_outbox_message" table in the database.
+ * It includes basic information about a contractor entity and audit-related fields.
+ * @author Matushkin Anton
+ */
 @Data
 @Entity
 @NoArgsConstructor

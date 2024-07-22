@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Repository for {@link DealContractor} entities.
+ * @author Matushkin Anton
+ */
 @Repository
 public interface ContractorRepository extends JpaRepository<DealContractor, UUID> {
 

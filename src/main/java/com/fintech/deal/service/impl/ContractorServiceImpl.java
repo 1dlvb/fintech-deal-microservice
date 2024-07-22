@@ -25,6 +25,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+
+/**
+ * An implementation of {@link ContractorService}
+ * @author Matushkin Anton
+ */
 @Service
 @RequiredArgsConstructor
 public class ContractorServiceImpl implements ContractorService {

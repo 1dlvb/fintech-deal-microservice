@@ -8,6 +8,11 @@ import com.onedlvb.advice.annotation.AuditLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+
+/**
+ * An implementation of {@link StatusService}
+ * @author Matushkin Anton
+ */
 @Service
 @RequiredArgsConstructor
 public class StatusServiceImpl implements StatusService {

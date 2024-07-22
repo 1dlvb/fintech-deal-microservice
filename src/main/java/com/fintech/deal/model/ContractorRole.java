@@ -9,6 +9,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entity class representing a contractor role.
+ * This class maps to the "contractor_role" table in the database.
+ * @author Matushkin Anton
+ */
 @Entity
 @Data
 @Builder
