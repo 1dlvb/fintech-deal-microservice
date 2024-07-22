@@ -41,7 +41,7 @@ class ContractorOutboxServiceImplTests {
     }
 
     @Test
-    void testUpdateMainBorrower_Success() {
+    void testUpdateMainBorrowerSuccess() {
         DealContractor contractor = new DealContractor();
         contractor.setContractorId("123");
 
@@ -116,18 +116,14 @@ class ContractorOutboxServiceImplTests {
         message.setContent("Update main borrower: Contractor ID 123 Has main deals true ON_UPDATE_STATUS_ACTIVE Status code 200");
         message.setSent(false);
         message.setStatus(MessageStatus.FAILED);
-        // Create a Deal with a CLOSED status
         DealStatus closedStatus = new DealStatus("CLOSED", "Closed", true);
         Deal deal = new Deal();
         deal.setStatus(closedStatus);
 
-        // Mock the repository to return the Deal
         when(repository.findDealsByContractorId(contractorId)).thenReturn(deal);
 
-        // Call the method under test
         boolean result = contractorOutboxService.shouldResend(contractorId, message);
 
-        // Assert results
         assertFalse(result);
         assertTrue(message.isSent());
         assertThat(message.getStatus()).isEqualTo(MessageStatus.SUCCESS);
