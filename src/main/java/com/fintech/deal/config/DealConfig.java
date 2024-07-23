@@ -23,11 +23,6 @@ public class DealConfig {
     }
 
     @Bean
-    public Dotenv dotenv() {
-        return Dotenv.configure().load();
-    }
-
-    @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .info(new Info()
