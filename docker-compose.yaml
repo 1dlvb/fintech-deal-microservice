@@ -4,6 +4,8 @@ services:
   postgres:
     image: 'postgres:latest'
     container_name: "deal_postgres"
+    volumes:
+      - db_data:/var/lib/postgresql/data
     ports:
       - '5433:5432'
     environment:
@@ -11,3 +13,6 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=deal_db
     restart: always
+
+volumes:
+  db_data:
