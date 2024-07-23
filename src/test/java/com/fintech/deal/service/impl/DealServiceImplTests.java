@@ -1,12 +1,15 @@
 package com.fintech.deal.service.impl;
 
+import com.fintech.deal.config.DealConfig;
 import com.fintech.deal.dto.ChangeStatusOfDealDTO;
 import com.fintech.deal.dto.DealWithContractorsDTO;
 import com.fintech.deal.dto.ResponseDealDTO;
 import com.fintech.deal.dto.SaveOrUpdateDealDTO;
+import com.fintech.deal.feign.config.FeignConfig;
 import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.DealStatus;
+import com.fintech.deal.quartz.config.QuartzConfig;
 import com.fintech.deal.repository.ContractorRepository;
 import com.fintech.deal.repository.DealContractorRoleRepository;
 import com.fintech.deal.repository.DealRepository;
@@ -17,6 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +34,8 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 
+@ActiveProfiles("test")
+@Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
 class DealServiceImplTests {
 
     @Mock

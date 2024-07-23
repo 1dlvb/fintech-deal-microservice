@@ -1,19 +1,24 @@
 package com.fintech.deal.service.impl;
 
+import com.fintech.deal.config.DealConfig;
 import com.fintech.deal.dto.MainBorrowerDTO;
 import com.fintech.deal.feign.ContractorFeignClient;
+import com.fintech.deal.feign.config.FeignConfig;
 import com.fintech.deal.model.ContractorOutboxMessage;
 import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.DealStatus;
 import com.fintech.deal.model.MessageStatus;
+import com.fintech.deal.quartz.config.QuartzConfig;
 import com.fintech.deal.repository.ContractorOutboxRepository;
 import com.fintech.deal.util.WhenUpdateMainBorrowerInvoked;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,14 +28,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-
+@ActiveProfiles("test")
+@Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
 class ContractorOutboxServiceImplTests {
 
     @Mock
     private ContractorFeignClient feignClient;
 
     @Mock
-    private ContractorOutboxRepository repository;
+    private ContractorOutboxRepository contractorOutboxRepository;
 
     @InjectMocks
     private ContractorOutboxServiceImpl contractorOutboxService;
@@ -51,7 +57,7 @@ class ContractorOutboxServiceImplTests {
         contractorOutboxService.updateMainBorrower(contractor, true, WhenUpdateMainBorrowerInvoked.ON_UPDATE_STATUS_ACTIVE);
 
         ArgumentCaptor<ContractorOutboxMessage> captor = ArgumentCaptor.forClass(ContractorOutboxMessage.class);
-        verify(repository).save(captor.capture());
+        verify(contractorOutboxRepository).save(captor.capture());
 
         ContractorOutboxMessage savedMessage = captor.getValue();
         assertThat(savedMessage.getContractorId()).isEqualTo("123");
@@ -72,7 +78,7 @@ class ContractorOutboxServiceImplTests {
                 true,
                 WhenUpdateMainBorrowerInvoked.ON_UPDATE_STATUS_ACTIVE);
         ArgumentCaptor<ContractorOutboxMessage> captor = ArgumentCaptor.forClass(ContractorOutboxMessage.class);
-        verify(repository).save(captor.capture());
+        verify(contractorOutboxRepository).save(captor.capture());
 
         ContractorOutboxMessage savedMessage = captor.getValue();
         assertThat(savedMessage.getContractorId()).isEqualTo("123");
@@ -91,19 +97,19 @@ class ContractorOutboxServiceImplTests {
         message.setSent(false);
         failedMessages.add(message);
 
-        when(repository.findBySentFalse()).thenReturn(failedMessages);
+        when(contractorOutboxRepository.findBySentFalse()).thenReturn(failedMessages);
 
         DealStatus closedStatus = new DealStatus("CLOSED", "Closed", true);
         Deal deal = new Deal();
         deal.setStatus(closedStatus);
 
-        when(repository.findDealsByContractorId("123")).thenReturn(deal);
+        when(contractorOutboxRepository.findDealsByContractorId("123")).thenReturn(deal);
         when(feignClient.updateActiveMainBorrower(any(MainBorrowerDTO.class)))
                 .thenReturn(new ResponseEntity<>(HttpStatus.OK));
 
         contractorOutboxService.resendFailedMessage();
 
-        verify(repository).save(message);
+        verify(contractorOutboxRepository).save(message);
         assertTrue(message.isSent());
         assertThat(message.getStatus()).isEqualTo(MessageStatus.SUCCESS);
     }
@@ -120,7 +126,7 @@ class ContractorOutboxServiceImplTests {
         Deal deal = new Deal();
         deal.setStatus(closedStatus);
 
-        when(repository.findDealsByContractorId(contractorId)).thenReturn(deal);
+        when(contractorOutboxRepository.findDealsByContractorId(contractorId)).thenReturn(deal);
 
         boolean result = contractorOutboxService.shouldResend(contractorId, message);
 
@@ -142,7 +148,7 @@ class ContractorOutboxServiceImplTests {
         Deal deal = new Deal();
         deal.setStatus(closedStatus);
 
-        when(repository.findDealsByContractorId(contractorId)).thenReturn(deal);
+        when(contractorOutboxRepository.findDealsByContractorId(contractorId)).thenReturn(deal);
 
         boolean result = contractorOutboxService.shouldResend(contractorId, message);
 

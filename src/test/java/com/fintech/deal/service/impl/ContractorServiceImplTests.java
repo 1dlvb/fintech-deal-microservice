@@ -1,14 +1,17 @@
 package com.fintech.deal.service.impl;
 
+import com.fintech.deal.config.DealConfig;
 import com.fintech.deal.dto.ContractorDTO;
 import com.fintech.deal.dto.RoleDTO;
 import com.fintech.deal.exception.NotActiveException;
+import com.fintech.deal.feign.config.FeignConfig;
 import com.fintech.deal.model.ContractorRole;
 import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.DealContractorRole;
 import com.fintech.deal.model.DealStatus;
 import com.fintech.deal.model.DealType;
+import com.fintech.deal.quartz.config.QuartzConfig;
 import com.fintech.deal.repository.ContractorRepository;
 import com.fintech.deal.repository.DealContractorRoleRepository;
 import com.fintech.deal.service.ContractorOutboxService;
@@ -20,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,7 +33,8 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-
+@ActiveProfiles("test")
+@Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
 class ContractorServiceImplTests {
 
     @Mock
