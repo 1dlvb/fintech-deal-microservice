@@ -1,7 +1,6 @@
 package com.fintech.deal.config;
 
 import com.fintech.deal.auditor.AuditorAwareImpl;
-import io.github.cdimascio.dotenv.Dotenv;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import org.springframework.context.annotation.Bean;
