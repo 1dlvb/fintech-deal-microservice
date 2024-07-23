@@ -42,7 +42,7 @@ import java.util.UUID;
 public class DealServiceImpl implements DealService {
 
     @NonNull
-    private final DealRepository repository;
+    private final DealRepository dealRepository;
 
     @NonNull
     private final ContractorRepository contractorRepository;
@@ -61,14 +61,14 @@ public class DealServiceImpl implements DealService {
     public ResponseDealDTO saveDeal(SaveOrUpdateDealDTO saveOrUpdateDealDTO) {
         Deal deal = SaveOrUpdateDealDTO.fromDTO(saveOrUpdateDealDTO);
         deal.setStatus(statusService.getStatusById("DRAFT"));
-        if (deal.getId() != null && repository.existsById(deal.getId())) {
-            Deal existingDeal = repository.findById(deal.getId()).orElse(null);
+        if (deal.getId() != null && dealRepository.existsById(deal.getId())) {
+            Deal existingDeal = dealRepository.findById(deal.getId()).orElse(null);
             if (existingDeal != null) {
                 updateProperties(existingDeal, deal);
-                deal = repository.save(existingDeal);
+                deal = dealRepository.save(existingDeal);
             }
         } else {
-            deal = repository.save(deal);
+            deal = dealRepository.save(deal);
         }
         return ResponseDealDTO.toDTO(deal);
     }
@@ -79,12 +79,12 @@ public class DealServiceImpl implements DealService {
         UUID id = changeStatusOfDealDTO.getId();
 
         DealStatus status = statusService.getStatusById(changeStatusOfDealDTO.getStatus().getId());
-        Optional<Deal> dealOptional = repository.findById(id);
+        Optional<Deal> dealOptional = dealRepository.findById(id);
         Deal deal = dealOptional.orElseThrow(() -> new EntityNotFoundException("Deal not found for ID: " + id));
 
         String dealOldStatus = deal.getStatus().getId();
         deal.setStatus(status);
-        repository.save(deal);
+        dealRepository.save(deal);
         List<DealContractor> dealContractors = contractorRepository.findAllByDealId(deal.getId());
         for (DealContractor dc: dealContractors) {
             if (dealOldStatus.equals("DRAFT") && status.getId().equals("ACTIVE")) {
@@ -100,21 +100,21 @@ public class DealServiceImpl implements DealService {
     @Override
     @AuditLog(logLevel = LogLevel.INFO)
     public Deal getDealById(UUID id) {
-        return repository.findById(id).orElse(null);
+        return dealRepository.findById(id).orElse(null);
     }
 
     @Override
     @AuditLog(logLevel = LogLevel.INFO)
     public DealWithContractorsDTO getDealWithContractorsById(UUID id) {
         List<DealContractor> contractors = getListOfContractorsByDealId(id);
-        return DealWithContractorsDTO.toDTO(Objects.requireNonNull(repository.findById(id).orElse(null)),
+        return DealWithContractorsDTO.toDTO(Objects.requireNonNull(dealRepository.findById(id).orElse(null)),
                 contractors.stream().map(contractor -> getContractorDtoWithRoles(contractor, contractor.getId())).toList());
     }
 
     @Override
     @AuditLog(logLevel = LogLevel.INFO)
     public List<DealContractor> getListOfContractorsByDealId(UUID dealID) {
-        Optional<Deal> optionalDeal = repository.findById(dealID);
+        Optional<Deal> optionalDeal = dealRepository.findById(dealID);
         Deal deal = optionalDeal.orElse(null);
         return contractorRepository.findAllByDealId(Objects.requireNonNull(deal).getId());
     }
@@ -122,7 +122,7 @@ public class DealServiceImpl implements DealService {
     @Override
     @AuditLog(logLevel = LogLevel.INFO)
     public Page<DealWithContractorsDTO> searchDeals(SearchDealPayload payload, Pageable pageable) {
-        return repository.findAll(DealSpecification.searchDeals(payload), pageable)
+        return dealRepository.findAll(DealSpecification.searchDeals(payload), pageable)
                 .map(deal -> DealWithContractorsDTO.toDTO(deal, getListOfContractorsByDealId(deal.getId()).stream()
                         .map(contractor -> {
                             ContractorWithNoDealIdDTO dto = getContractorDtoWithRoles(contractor, contractor.getId());

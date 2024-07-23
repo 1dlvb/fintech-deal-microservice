@@ -17,12 +17,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class StatusServiceImpl implements StatusService {
 
-    private final StatusRepository repository;
+    private final StatusRepository statusRepository;
 
     @Override
     @AuditLog(logLevel = LogLevel.INFO)
     public DealStatus getStatusById(String id) {
-        return repository.findById(id).orElse(null);
+        return statusRepository.findById(id).orElse(null);
     }
 
 }

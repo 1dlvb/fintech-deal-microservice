@@ -33,7 +33,7 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
     private ContractorFeignClient feignClient;
 
     @NonNull
-    private ContractorOutboxRepository repository;
+    private ContractorOutboxRepository contractorOutboxRepository;
     @AuditLog(logLevel = LogLevel.INFO)
     public void updateMainBorrower(DealContractor contractor, boolean hasMainDeals,
                                    WhenUpdateMainBorrowerInvoked whenInvoked) {
@@ -58,12 +58,12 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
                     String.format("Update main borrower: Contractor ID %s Has main deals %s %s Status code %s",
                     contractor.getContractorId(), hasMainDeals, whenInvoked, fe.status()));
         }
-        repository.save(contractorOutboxMessage);
+        contractorOutboxRepository.save(contractorOutboxMessage);
     }
 
     @AuditLog(logLevel = LogLevel.INFO)
     public void resendFailedMessage() {
-        List<ContractorOutboxMessage> failedMessages = repository.findBySentFalse();
+        List<ContractorOutboxMessage> failedMessages = contractorOutboxRepository.findBySentFalse();
         Collections.reverse(failedMessages);
         for (ContractorOutboxMessage message : failedMessages) {
             if (shouldResend(message.getContractorId(), message)) {
@@ -71,7 +71,7 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
                     feignClient.updateActiveMainBorrower(new MainBorrowerDTO(message.getContractorId(), message.isActiveMainBorrower()));
                     message.setStatus(MessageStatus.SUCCESS);
                     message.setSent(true);
-                    repository.save(message);
+                    contractorOutboxRepository.save(message);
                 } catch (Exception ignored) {
                 }
             }
@@ -80,12 +80,12 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
 
     @AuditLog(logLevel = LogLevel.INFO)
     public Boolean shouldResend(String contractorId, ContractorOutboxMessage message) {
-        Deal deal = repository.findDealsByContractorId(contractorId);
+        Deal deal = contractorOutboxRepository.findDealsByContractorId(contractorId);
         if (deal.getStatus().getId().equals("CLOSED")
                 && message.getContent().contains(WhenUpdateMainBorrowerInvoked.ON_UPDATE_STATUS_ACTIVE.name())) {
             message.setSent(true);
             message.setStatus(MessageStatus.SUCCESS);
-            repository.save(message);
+            contractorOutboxRepository.save(message);
             return false;
         } else {
             return true;

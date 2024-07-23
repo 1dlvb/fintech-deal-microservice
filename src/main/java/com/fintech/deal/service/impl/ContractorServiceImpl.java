@@ -35,7 +35,7 @@ import java.util.UUID;
 public class ContractorServiceImpl implements ContractorService {
 
     @NonNull
-    private final ContractorRepository repository;
+    private final ContractorRepository contractorRepository;
 
     @NonNull
     private final DealService dealService;
@@ -55,20 +55,20 @@ public class ContractorServiceImpl implements ContractorService {
     public ContractorDTO saveContractor(ContractorDTO contractorDTO) {
         DealContractor contractor = ContractorDTO.fromDTO(contractorDTO, dealService);
 
-        if (contractor.getMain() && repository.existsByDealIdAndMainTrue(contractor.getDeal().getId())) {
+        if (contractor.getMain() && contractorRepository.existsByDealIdAndMainTrue(contractor.getDeal().getId())) {
             throw new IllegalStateException("Only one record can have main = true for each deal_id");
         }
 
         Optional<DealContractor> existingContractorOpt =
-                repository.findByDealIdAndContractorId(contractor.getDeal().getId(), contractor.getContractorId());
+                contractorRepository.findByDealIdAndContractorId(contractor.getDeal().getId(), contractor.getContractorId());
 
 
         if (existingContractorOpt.isPresent()) {
             DealContractor existingContractor = existingContractorOpt.get();
             updateProperties(existingContractor, contractor);
-            contractor = repository.save(existingContractor);
+            contractor = contractorRepository.save(existingContractor);
         } else {
-            contractor = repository.save(contractor);
+            contractor = contractorRepository.save(contractor);
         }
         return getDtoWithRoles(contractor, contractor.getId());
     }
@@ -77,12 +77,12 @@ public class ContractorServiceImpl implements ContractorService {
     @Transactional
     @AuditLog(logLevel = LogLevel.INFO)
     public void deleteContractor(UUID id) throws NotActiveException {
-        Optional<DealContractor> contractorOptional = repository.findById(id);
+        Optional<DealContractor> contractorOptional = contractorRepository.findById(id);
         DealContractor contractor = contractorOptional.orElseThrow(() ->
                 new EntityNotFoundException("Contractor not found for ID: " + id));
         if (contractor.getIsActive()) {
             contractor.setIsActive(false);
-            repository.save(contractor);
+            contractorRepository.save(contractor);
         } else {
             throw new NotActiveException("Contractor is not active");
         }
@@ -93,7 +93,7 @@ public class ContractorServiceImpl implements ContractorService {
     @Override
     @AuditLog(logLevel = LogLevel.INFO)
     public ContractorDTO addRole(UUID id, RoleDTO roleDTO) {
-        Optional<DealContractor> contractorOptional = repository.findById(id);
+        Optional<DealContractor> contractorOptional = contractorRepository.findById(id);
         DealContractor contractor = contractorOptional.orElseThrow(() ->
                 new EntityNotFoundException("Contractor not found for ID: " + id));
 
@@ -138,7 +138,7 @@ public class ContractorServiceImpl implements ContractorService {
     }
 
     private void updateActiveMainBorrowerInContractorService(DealContractor contractor, boolean hasMainDeals) {
-        if (contractor.getMain() && repository.existsOtherDealsByContractorWhereMainIsTrueId(contractor.getContractorId())) {
+        if (contractor.getMain() && contractorRepository.existsOtherDealsByContractorWhereMainIsTrueId(contractor.getContractorId())) {
             outboxService.updateMainBorrower(contractor, hasMainDeals, WhenUpdateMainBorrowerInvoked.ON_DELETE);
         }
     }
