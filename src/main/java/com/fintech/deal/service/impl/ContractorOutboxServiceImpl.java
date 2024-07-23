@@ -34,6 +34,17 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
 
     @NonNull
     private ContractorOutboxRepository contractorOutboxRepository;
+
+    /**
+     * Updates the main borrower status for the given contractor and logs the outcome.
+     * <p>
+     * This method sends a request to the contractor service to update the main borrower status. It records
+     * the outcome of the request and saves the message to the outbox repository.
+     * @see ContractorFeignClient
+     * @param contractor The contractor for whom the main borrower status is being updated.
+     * @param hasMainDeals Indicates if the contractor has main deals.
+     * @param whenInvoked Specifies when the update was invoked.
+     */
     @AuditLog(logLevel = LogLevel.INFO)
     public void updateMainBorrower(DealContractor contractor, boolean hasMainDeals,
                                    WhenUpdateMainBorrowerInvoked whenInvoked) {
@@ -61,6 +72,12 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
         contractorOutboxRepository.save(contractorOutboxMessage);
     }
 
+    /**
+     * Resends messages from the outbox that failed to be sent previously.
+     * <p>
+     * This method retrieves all failed messages, attempts to resend them, and updates their status
+     * based on the outcome of the resend attempt.
+     */
     @AuditLog(logLevel = LogLevel.INFO)
     public void resendFailedMessage() {
         List<ContractorOutboxMessage> failedMessages = contractorOutboxRepository.findBySentFalse();
@@ -78,6 +95,16 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
         }
     }
 
+    /**
+     * Determines whether a message should be resent based on the status of the associated deal.
+     * <p>
+     * This method checks the status of the deal associated with the contractor ID in the message. If the deal
+     * is closed and the message was invoked to update the status to active, the message is marked as sent
+     * and its status is updated to success.
+     * @param contractorId The ID of the contractor associated with the message.
+     * @param message The message to check for resend.
+     * @return {@code true} if the message should be resent, {@code false} otherwise.
+     */
     @AuditLog(logLevel = LogLevel.INFO)
     public Boolean shouldResend(String contractorId, ContractorOutboxMessage message) {
         Deal deal = contractorOutboxRepository.findDealsByContractorId(contractorId);
