@@ -6,6 +6,7 @@ import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.MessageStatus;
 import com.fintech.deal.model.ContractorOutboxMessage;
+import com.fintech.deal.model.StatusEnum;
 import com.fintech.deal.repository.ContractorOutboxRepository;
 import com.fintech.deal.service.ContractorOutboxService;
 import com.fintech.deal.util.WhenUpdateMainBorrowerInvoked;
@@ -63,11 +64,14 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
             contractorOutboxMessage.setContent(
                     String.format("Update main borrower: Contractor ID %s Has main deals %s %s Status code %s",
                     contractor.getContractorId(), hasMainDeals, whenInvoked, response.getStatusCode()));
+            contractorOutboxMessage.setException(null);
+
         } catch (FeignException fe) {
             contractorOutboxMessage.setStatus(MessageStatus.FAILED);
             contractorOutboxMessage.setContent(
                     String.format("Update main borrower: Contractor ID %s Has main deals %s %s Status code %s",
                     contractor.getContractorId(), hasMainDeals, whenInvoked, fe.status()));
+            contractorOutboxMessage.setException(fe.getMessage());
         }
         contractorOutboxRepository.save(contractorOutboxMessage);
     }
@@ -88,8 +92,13 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
                     feignClient.updateActiveMainBorrower(new MainBorrowerDTO(message.getContractorId(), message.isActiveMainBorrower()));
                     message.setStatus(MessageStatus.SUCCESS);
                     message.setSent(true);
+                    message.setException(null);
                     contractorOutboxRepository.save(message);
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    message.setSent(false);
+                    message.setStatus(MessageStatus.FAILED);
+                    message.setException(e.getMessage());
+                    contractorOutboxRepository.save(message);
                 }
             }
         }
@@ -108,10 +117,11 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
     @AuditLog(logLevel = LogLevel.INFO)
     public Boolean shouldResend(String contractorId, ContractorOutboxMessage message) {
         Deal deal = contractorOutboxRepository.findDealsByContractorId(contractorId);
-        if (deal.getStatus().getId().equals("CLOSED")
+        if (deal.getStatus().getId().equals(StatusEnum.CLOSED.name())
                 && message.getContent().contains(WhenUpdateMainBorrowerInvoked.ON_UPDATE_STATUS_ACTIVE.name())) {
             message.setSent(true);
             message.setStatus(MessageStatus.SUCCESS);
+            message.setException(null);
             contractorOutboxRepository.save(message);
             return false;
         } else {
