@@ -138,7 +138,8 @@ public class ContractorServiceImpl implements ContractorService {
     }
 
     private void updateActiveMainBorrowerInContractorService(DealContractor contractor, boolean hasMainDeals) {
-        if (contractor.getMain() && contractorRepository.existsOtherDealsByContractorWhereMainIsTrueId(contractor.getContractorId())) {
+        if (contractor.getMain() != null && contractor.getMain()
+                && contractorRepository.existsOtherDealsByContractorWhereMainIsTrueId(contractor.getContractorId())) {
             outboxService.updateMainBorrower(contractor, hasMainDeals, WhenUpdateMainBorrowerInvoked.ON_DELETE);
         }
     }
