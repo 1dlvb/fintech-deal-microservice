@@ -274,6 +274,11 @@ databaseChangeLog:
                     nullable: false
                   defaultValueBoolean: false
               - column:
+                  name: exception
+                  type: text
+                  constraints:
+                    nullable: true
+              - column:
                   name: created_at
                   type: timestamp
                   constraints:

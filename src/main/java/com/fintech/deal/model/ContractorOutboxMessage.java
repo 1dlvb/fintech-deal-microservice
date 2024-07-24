@@ -46,6 +46,10 @@ public class ContractorOutboxMessage {
 
     private boolean sent = false;
 
+
+    @Column(name = "exception")
+    private String exception;
+
     @Column(nullable = false, name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
