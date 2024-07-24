@@ -44,7 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
 @SpringBootTest
 @Testcontainers
-public class ContractorControllerTests {
+class ContractorControllerTests {
     @Container
     public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:latest")
             .withDatabaseName("test_db")

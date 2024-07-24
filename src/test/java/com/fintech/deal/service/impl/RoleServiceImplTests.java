@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 @Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
-public class RoleServiceImplTests {
+class RoleServiceImplTests {
 
     @Mock
     private RoleRepository roleRepository;

@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
 @Testcontainers
-public class DealSpecificationTests {
+class DealSpecificationTests {
 
     @Container
     public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:latest")

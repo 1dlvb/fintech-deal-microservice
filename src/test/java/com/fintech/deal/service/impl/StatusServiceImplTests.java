@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 @Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
-public class StatusServiceImplTests {
+class StatusServiceImplTests {
 
     @Mock
     private StatusRepository statusRepository;
