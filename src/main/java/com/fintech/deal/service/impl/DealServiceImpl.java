@@ -9,6 +9,7 @@ import com.fintech.deal.model.ContractorRole;
 import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.DealStatus;
+import com.fintech.deal.model.StatusEnum;
 import com.fintech.deal.payload.SearchDealPayload;
 import com.fintech.deal.repository.ContractorRepository;
 import com.fintech.deal.repository.DealContractorRoleRepository;
@@ -60,7 +61,7 @@ public class DealServiceImpl implements DealService {
     @AuditLog(logLevel = LogLevel.INFO)
     public ResponseDealDTO saveDeal(SaveOrUpdateDealDTO saveOrUpdateDealDTO) {
         Deal deal = SaveOrUpdateDealDTO.fromDTO(saveOrUpdateDealDTO);
-        deal.setStatus(statusService.getStatusById("DRAFT"));
+        deal.setStatus(statusService.getStatusById(StatusEnum.DRAFT.name()));
         if (deal.getId() != null && dealRepository.existsById(deal.getId())) {
             Deal existingDeal = dealRepository.findById(deal.getId()).orElse(null);
             if (existingDeal != null) {
@@ -87,10 +88,11 @@ public class DealServiceImpl implements DealService {
         dealRepository.save(deal);
         List<DealContractor> dealContractors = contractorRepository.findAllByDealId(deal.getId());
         for (DealContractor dc: dealContractors) {
-            if (dealOldStatus.equals("DRAFT") && status.getId().equals("ACTIVE")) {
-                updateActiveMainBorrowerInContractorService(dc, "ACTIVE", true);
-            } else if (dealOldStatus.equals("ACTIVE") && status.getId().equals("CLOSED")) {
-                updateActiveMainBorrowerInContractorService(dc, "CLOSED", false);
+            if (dealOldStatus.equals(StatusEnum.DRAFT.name()) && status.getId().equals(StatusEnum.ACTIVE.name())) {
+                updateActiveMainBorrowerInContractorService(dc, StatusEnum.ACTIVE.name(), true);
+            } else if (dealOldStatus.equals(StatusEnum.ACTIVE.name())
+                    && status.getId().equals(StatusEnum.CLOSED.name())) {
+                updateActiveMainBorrowerInContractorService(dc, StatusEnum.CLOSED.name(), false);
             }
         }
 
@@ -158,9 +160,9 @@ public class DealServiceImpl implements DealService {
     private void updateActiveMainBorrowerInContractorService(DealContractor dc, String status, boolean hasMainDeals) {
         if (contractorRepository.countDealsWithStatusActiveByContractorId(dc.getContractorId(), status) == 1
                 && dc.getMain()) {
-            if (status.equals("ACTIVE")) {
+            if (status.equals(StatusEnum.ACTIVE.name())) {
                 outboxService.updateMainBorrower(dc, hasMainDeals, WhenUpdateMainBorrowerInvoked.ON_UPDATE_STATUS_ACTIVE);
-            } else if (status.equals("CLOSED")) {
+            } else if (status.equals(StatusEnum.CLOSED.name())) {
                 outboxService.updateMainBorrower(dc, hasMainDeals, WhenUpdateMainBorrowerInvoked.ON_UPDATE_STATUS_CLOSED);
             }
         }
