@@ -1,13 +1,18 @@
+version: '3.8'
+
 services:
   postgres:
     image: 'postgres:latest'
     container_name: "deal_postgres"
+    volumes:
+      - db_data:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
-    env_file:
-      - .env
+      - '5433:5432'
     environment:
-      - POSTGRES_USER=${DEAL_POSTGRES_USER}
-      - POSTGRES_PASSWORD=${DEAL_POSTGRES_PASSWORD}
-      - POSTGRES_DB=${DEAL_POSTGRES_DB}
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=deal_db
     restart: always
+
+volumes:
+  db_data:
