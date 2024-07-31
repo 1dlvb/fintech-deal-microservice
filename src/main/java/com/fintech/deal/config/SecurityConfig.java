@@ -39,16 +39,16 @@ public class SecurityConfig {
                                 Roles.SUPERUSER.name(),
                                 Roles.DEAL_SUPERUSER.name())
                         .requestMatchers(HttpMethod.GET, "/deal/**").hasAnyAuthority(
-                                        Roles.USER.name(),
-                                        Roles.CREDIT_USER.name(),
-                                        Roles.OVERDRAFT_USER.name(),
-                                        Roles.DEAL_SUPERUSER.name(),
-                                        Roles.CONTRACTOR_RUS.name()
+                                Roles.USER.name(),
+                                Roles.CREDIT_USER.name(),
+                                Roles.OVERDRAFT_USER.name(),
+                                Roles.DEAL_SUPERUSER.name(),
+                                Roles.CONTRACTOR_RUS.name()
                         ).requestMatchers("/deal/search").hasAnyAuthority(
-                            Roles.CREDIT_USER.name(),
-                            Roles.OVERDRAFT_USER.name(),
-                            Roles.SUPERUSER.name(),
-                            Roles.DEAL_SUPERUSER.name()
+                                Roles.CREDIT_USER.name(),
+                                Roles.OVERDRAFT_USER.name(),
+                                Roles.SUPERUSER.name(),
+                                Roles.DEAL_SUPERUSER.name()
                         )
                         .anyRequest().authenticated()
                 )
