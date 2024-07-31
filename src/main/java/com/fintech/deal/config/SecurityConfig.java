@@ -44,13 +44,13 @@ public class SecurityConfig {
                                         Roles.OVERDRAFT_USER.name(),
                                         Roles.DEAL_SUPERUSER.name(),
                                         Roles.CONTRACTOR_RUS.name()
-                                ).requestMatchers("/deal/search").hasAnyAuthority(
-                                    Roles.CREDIT_USER.name(),
-                                    Roles.OVERDRAFT_USER.name(),
-                                    Roles.SUPERUSER.name(),
-                                    Roles.DEAL_SUPERUSER.name()
-                                )
-                                .anyRequest().authenticated()
+                        ).requestMatchers("/deal/search").hasAnyAuthority(
+                            Roles.CREDIT_USER.name(),
+                            Roles.OVERDRAFT_USER.name(),
+                            Roles.SUPERUSER.name(),
+                            Roles.DEAL_SUPERUSER.name()
+                        )
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(manager ->
                         manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
