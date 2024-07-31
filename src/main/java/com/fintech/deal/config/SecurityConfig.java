@@ -35,9 +35,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/**").hasAnyAuthority(
+                        .requestMatchers("/deal/search").hasAnyAuthority(
+                                Roles.CREDIT_USER.name(),
+                                Roles.OVERDRAFT_USER.name(),
                                 Roles.SUPERUSER.name(),
-                                Roles.DEAL_SUPERUSER.name())
+                                Roles.DEAL_SUPERUSER.name()
+                        )
                         .requestMatchers(HttpMethod.GET, "/deal/**").hasAnyAuthority(
                                 Roles.USER.name(),
                                 Roles.CREDIT_USER.name(),
@@ -46,12 +49,9 @@ public class SecurityConfig {
                                 Roles.CONTRACTOR_SUPERUSER.name(),
                                 Roles.SUPERUSER.name(),
                                 Roles.CONTRACTOR_RUS.name()
-                        ).requestMatchers("/deal/search").hasAnyAuthority(
-                                Roles.CREDIT_USER.name(),
-                                Roles.OVERDRAFT_USER.name(),
+                        ).requestMatchers("/**").hasAnyAuthority(
                                 Roles.SUPERUSER.name(),
-                                Roles.DEAL_SUPERUSER.name()
-                        )
+                                Roles.DEAL_SUPERUSER.name())
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(manager ->
