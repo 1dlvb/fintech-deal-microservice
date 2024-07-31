@@ -3,8 +3,11 @@ package com.fintech.deal.repository.specification;
 import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.DealContractorRole;
+import com.fintech.deal.model.DealType;
 import com.fintech.deal.payload.SearchDealPayload;
 import com.fintech.deal.util.WildcatEnhancer;
+import com.onedlvb.jwtlib.util.Roles;
+import com.onedlvb.jwtlib.util.SecurityUtil;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -34,21 +37,25 @@ public final class DealSpecification {
      * @return A {@link Specification} for {@link Deal} that can be used in a query.
      */
     public static Specification<Deal> searchDeals(SearchDealPayload payload) {
+        SearchDealPayload finalPayload = roleBasedPayloadModification(payload);
+        if (finalPayload == null) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.disjunction();
+        }
         return (root, query, criteriaBuilder) -> {
             Stream<Predicate> predicateStream = Stream.of(
                     criteriaBuilder.isTrue(root.get("isActive")),
-                    createEqualPredicate(criteriaBuilder, root, "id", payload.id()),
-                    createEqualPredicate(criteriaBuilder, root, "description", payload.description()),
-                    createLikePredicate(criteriaBuilder, root, "agreementNumber", payload.agreementNumber()),
+                    createEqualPredicate(criteriaBuilder, root, "id", finalPayload.getId()),
+                    createEqualPredicate(criteriaBuilder, root, "description", finalPayload.getDescription()),
+                    createLikePredicate(criteriaBuilder, root, "agreementNumber", finalPayload.getAgreementNumber()),
                     createDateBetweenPredicate(criteriaBuilder, root, "agreementDate",
-                            payload.agreementDateFrom(), payload.agreementDateTo()),
+                            finalPayload.getAgreementDateFrom(), finalPayload.getAgreementDateTo()),
                     createDateBetweenPredicate(criteriaBuilder, root, "availabilityDate",
-                            payload.availabilityDateFrom(), payload.availabilityDateTo()),
-                    createInPredicate(root, "type", payload.type()),
-                    createInPredicate(root, "status", payload.status()),
+                            finalPayload.getAvailabilityDateFrom(), finalPayload.getAvailabilityDateTo()),
+                    createInPredicate(root, "type", finalPayload.getType()),
+                    createInPredicate(root, "status", finalPayload.getStatus()),
                     createDateTimeBetweenPredicate(criteriaBuilder, root, "closeDt",
-                            payload.closeDtFrom(), payload.closeDtTo()),
-                    createContractorPredicate(criteriaBuilder, root, payload.contractorSearchValue())
+                            finalPayload.getCloseDtFrom(), finalPayload.getCloseDtTo()),
+                    createContractorPredicate(criteriaBuilder, root, finalPayload.getContractorSearchValue())
 
             );
 
@@ -156,6 +163,68 @@ public final class DealSpecification {
                 cb.equal(contractorRole.get("contractorRole").get("category"), "WARRANTY")
         );
         return cb.and(groupPredicate, cb.or(orPredicates.toArray(new Predicate[0])));
+    }
+
+    private static SearchDealPayload roleBasedPayloadModification(SearchDealPayload payload) {
+        boolean hasSuperuser = SecurityUtil.hasRole(Roles.SUPERUSER);
+        boolean hasDealSuperuser = SecurityUtil.hasRole(Roles.DEAL_SUPERUSER);
+
+        if (hasSuperuser || hasDealSuperuser) {
+            return payload;
+        }
+
+        if (payload.isEmpty()) {
+            return handleEmptyExceptTypePayload();
+        }
+        if (!payload.isEmptyExceptType()) {
+            return null;
+        }
+        boolean hasCreditRole = SecurityUtil.hasRole(Roles.CREDIT_USER);
+        boolean hasOverdraftRole = SecurityUtil.hasRole(Roles.OVERDRAFT_USER);
+
+        return handleNonEmptyPayload(payload, hasCreditRole, hasOverdraftRole);
+    }
+
+    private static SearchDealPayload handleEmptyExceptTypePayload() {
+        boolean hasCreditRole = SecurityUtil.hasRole(Roles.CREDIT_USER);
+        boolean hasOverdraftRole = SecurityUtil.hasRole(Roles.OVERDRAFT_USER);
+
+        List<DealType> types = new ArrayList<>();
+        if (hasCreditRole) {
+            types.add(DealType.builder().id("CREDIT").build());
+        }
+        if (hasOverdraftRole) {
+            types.add(DealType.builder().id("OVERDRAFT").build());
+        }
+
+        if (!types.isEmpty()) {
+            return SearchDealPayload.builder().type(types).build();
+        }
+        return null;
+    }
+
+    private static SearchDealPayload handleNonEmptyPayload(SearchDealPayload payload, boolean hasCreditRole, boolean hasOverdraftRole) {
+        List<DealType> types = payload.getType();
+
+        if (types == null) {
+            return null;
+        }
+
+        if (hasCreditRole && hasOverdraftRole) {
+            boolean hasRelevantType = types.stream().allMatch(type ->
+                    "CREDIT".equals(type.getId()) || "OVERDRAFT".equals(type.getId())
+            );
+            payload = SearchDealPayload.builder().type(types).build();
+            return hasRelevantType ? payload : null;
+        } else if (hasCreditRole) {
+            boolean hasCreditType = types.stream().allMatch(type -> "CREDIT".equals(type.getId()));
+            return hasCreditType ? payload : null;
+        } else if (hasOverdraftRole) {
+            boolean hasOverdraftType = types.stream().allMatch(type -> "OVERDRAFT".equals(type.getId()));
+            return hasOverdraftType ? payload : null;
+        }
+
+        return null;
     }
 
 }
