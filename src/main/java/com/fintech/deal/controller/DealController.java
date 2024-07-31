@@ -124,7 +124,7 @@ public class DealController {
                     content = @Content)
     })
     public Page<DealWithContractorsDTO> searchDeals(
-            @Parameter(description = "Search criteria") @RequestBody SearchDealPayload payload,
+            @Parameter(description = "Search criteria") SearchDealPayload payload,
             @Parameter(description = "Page number") @RequestParam(name = "page", defaultValue = "0") Integer page,
             @Parameter(description = "Page size") @RequestParam(name = "size", defaultValue = "10") Integer size) {
         Pageable pageable = PageRequest.of(page, size);
