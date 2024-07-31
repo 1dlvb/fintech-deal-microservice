@@ -43,6 +43,8 @@ public class SecurityConfig {
                                 Roles.CREDIT_USER.name(),
                                 Roles.OVERDRAFT_USER.name(),
                                 Roles.DEAL_SUPERUSER.name(),
+                                Roles.CONTRACTOR_SUPERUSER.name(),
+                                Roles.SUPERUSER.name(),
                                 Roles.CONTRACTOR_RUS.name()
                         ).requestMatchers("/deal/search").hasAnyAuthority(
                                 Roles.CREDIT_USER.name(),
