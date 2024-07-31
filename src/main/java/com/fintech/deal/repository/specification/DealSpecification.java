@@ -165,6 +165,16 @@ public final class DealSpecification {
         return cb.and(groupPredicate, cb.or(orPredicates.toArray(new Predicate[0])));
     }
 
+    /**
+     * Modifies the given payload based on the roles of the user.
+     * If the user has SUPERUSER or DEAL_SUPERUSER roles, the payload is returned as is.
+     * If the payload is empty, it returns a payload with type based on the user roles.
+     * If the payload is not empty except for type, it returns null.
+     * Otherwise, it handles the payload based on the user's roles and returns the modified payload.
+     *<p>
+     * @param payload The original payload containing search criteria.
+     * @return The modified payload or null based on the user's roles and payload content.
+     */
     private static SearchDealPayload roleBasedPayloadModification(SearchDealPayload payload) {
         boolean hasSuperuser = SecurityUtil.hasRole(Roles.SUPERUSER);
         boolean hasDealSuperuser = SecurityUtil.hasRole(Roles.DEAL_SUPERUSER);
@@ -185,6 +195,12 @@ public final class DealSpecification {
         return handleNonEmptyPayload(payload, hasCreditRole, hasOverdraftRole);
     }
 
+    /**
+     * Handles the case where the payload is empty except for type.
+     * It creates a new payload with the type based on the user's roles.
+     * <p>
+     * @return The modified payload or null if the user has no relevant roles.
+     */
     private static SearchDealPayload handleEmptyExceptTypePayload() {
         boolean hasCreditRole = SecurityUtil.hasRole(Roles.CREDIT_USER);
         boolean hasOverdraftRole = SecurityUtil.hasRole(Roles.OVERDRAFT_USER);
@@ -203,6 +219,15 @@ public final class DealSpecification {
         return null;
     }
 
+    /**
+     * Handles the case where the payload is not empty except for type.
+     * It checks the type against the user's roles and returns the payload if it matches.
+     * <p>
+     * @param payload The original payload containing search criteria.
+     * @param hasCreditRole Indicates if the user has the CREDIT_USER role.
+     * @param hasOverdraftRole Indicates if the user has the OVERDRAFT_USER role.
+     * @return The modified payload or null based on the user's roles and payload content.
+     */
     private static SearchDealPayload handleNonEmptyPayload(SearchDealPayload payload, boolean hasCreditRole, boolean hasOverdraftRole) {
         List<DealType> types = payload.getType();
 

@@ -20,6 +20,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -30,11 +36,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringJUnitConfig
 @ActiveProfiles("test")
@@ -65,7 +73,7 @@ class DealSpecificationTests {
 
     @BeforeEach
     public void setUp() {
-        DealType dealType = new DealType("TYPE", "type", true);
+        DealType dealType = new DealType("CREDIT", "credit", true);
         entityManager.persist(dealType);
 
         DealStatus dealStatus = new DealStatus("ACTIVE", "active", true);
@@ -110,9 +118,19 @@ class DealSpecificationTests {
         entityManager.clear();
     }
 
+    private void setupSecurityContext(String... roles) {
+        UserDetails user = User.withUsername("testUser")
+                .password("password")
+                .authorities(Arrays.stream(roles).map(SimpleGrantedAuthority::new).toList())
+                .build();
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
+        SecurityContextHolder.setContext(context);
+    }
 
     @Test
     public void testSearchDealsWithAllFilters() {
+        setupSecurityContext("SUPERUSER");
         SearchDealPayload payload = new SearchDealPayload(
                 null,
                 "Test Deal",
@@ -121,7 +139,7 @@ class DealSpecificationTests {
                 LocalDate.of(2023, 12, 31),
                 LocalDate.of(2023, 1, 1),
                 LocalDate.of(2023, 12, 31),
-                Collections.singletonList(new DealType("TYPE", "type", true)),
+                Collections.singletonList(new DealType("CREDIT", "credit", true)),
                 Collections.singletonList(new DealStatus("ACTIVE", "active", true)),
                 LocalDateTime.of(2023, 6, 1, 10, 0),
                 LocalDateTime.of(2023, 6, 1, 10, 0),
@@ -132,4 +150,110 @@ class DealSpecificationTests {
 
         assertFalse(results.isEmpty());
     }
+
+    @Test
+    public void testSearchDealsWithCreditRoleAndPayloadIsFullReturnsEmptyList() {
+        setupSecurityContext("CREDIT_USER");
+
+        SearchDealPayload payload = new SearchDealPayload(
+                null,
+                "Test Deal",
+                "Agreement123",
+                LocalDate.of(2023, 1, 1),
+                LocalDate.of(2023, 12, 31),
+                LocalDate.of(2023, 1, 1),
+                LocalDate.of(2023, 12, 31),
+                Collections.singletonList(new DealType("CREDIT", "credit", true)),
+                Collections.singletonList(new DealStatus("ACTIVE", "active", true)),
+                LocalDateTime.of(2023, 6, 1, 10, 0),
+                LocalDateTime.of(2023, 6, 1, 10, 0),
+                "1234567890"
+        );
+        Specification<Deal> spec = DealSpecification.searchDeals(payload);
+        List<Deal> results = dealRepository.findAll(spec);
+
+        assertTrue(results.isEmpty());
+    }
+    @Test
+    public void testSearchDealsWithCreditRoleAndPayloadIsEmpty() {
+        setupSecurityContext("CREDIT_USER");
+
+        SearchDealPayload payload = SearchDealPayload.builder().build();
+        Specification<Deal> spec = DealSpecification.searchDeals(payload);
+        List<Deal> results = dealRepository.findAll(spec);
+
+        assertFalse(results.isEmpty());
+    }
+    @Test
+    public void testSearchDealsWithCreditRoleAndPayloadHasTypeCredit() {
+        setupSecurityContext("CREDIT_USER");
+
+        SearchDealPayload payload = SearchDealPayload.builder().type(
+                Collections.singletonList(DealType.builder().id("CREDIT").build())).build();
+        Specification<Deal> spec = DealSpecification.searchDeals(payload);
+        List<Deal> results = dealRepository.findAll(spec);
+
+        assertFalse(results.isEmpty());
+    }
+    @Test
+    public void testSearchDealsWithCreditRoleAndPayloadHasTypeOverdraft() {
+        setupSecurityContext("CREDIT_USER");
+
+        SearchDealPayload payload = SearchDealPayload.builder().type(
+                Collections.singletonList(DealType.builder().id("OVERDRAFT").build())).build();
+        Specification<Deal> spec = DealSpecification.searchDeals(payload);
+        List<Deal> results = dealRepository.findAll(spec);
+
+        assertTrue(results.isEmpty());
+    }
+
+    @Test
+    public void testSearchDealsWithOverdraftRoleAndPayloadIsFullReturnsEmptyList() {
+        setupSecurityContext("OVERDRAFT_USER");
+
+        SearchDealPayload payload = new SearchDealPayload(
+                null,
+                "Test Deal",
+                "Agreement123",
+                LocalDate.of(2023, 1, 1),
+                LocalDate.of(2023, 12, 31),
+                LocalDate.of(2023, 1, 1),
+                LocalDate.of(2023, 12, 31),
+                Collections.singletonList(new DealType("OVERDRAFT", "overdraft", true)),
+                Collections.singletonList(new DealStatus("ACTIVE", "active", true)),
+                LocalDateTime.of(2023, 6, 1, 10, 0),
+                LocalDateTime.of(2023, 6, 1, 10, 0),
+                "1234567890"
+        );
+        Specification<Deal> spec = DealSpecification.searchDeals(payload);
+        List<Deal> results = dealRepository.findAll(spec);
+
+        assertTrue(results.isEmpty());
+    }
+
+    @Test
+    public void testSearchDealsWithBothRolesAndPayloadIsFullReturnsEmptyList() {
+        setupSecurityContext("CREDIT_USER", "OVERDRAFT_USER");
+
+        SearchDealPayload payload = new SearchDealPayload(
+                null,
+                "Test Deal",
+                "Agreement123",
+                LocalDate.of(2023, 1, 1),
+                LocalDate.of(2023, 12, 31),
+                LocalDate.of(2023, 1, 1),
+                LocalDate.of(2023, 12, 31),
+                List.of(new DealType("CREDIT", "credit", true),
+                        new DealType("OVERDRAFT", "overdraft", true)),
+                Collections.singletonList(new DealStatus("ACTIVE", "active", true)),
+                LocalDateTime.of(2023, 6, 1, 10, 0),
+                LocalDateTime.of(2023, 6, 1, 10, 0),
+                "1234567890"
+        );
+        Specification<Deal> spec = DealSpecification.searchDeals(payload);
+        List<Deal> results = dealRepository.findAll(spec);
+
+        assertTrue(results.isEmpty());
+    }
+
 }

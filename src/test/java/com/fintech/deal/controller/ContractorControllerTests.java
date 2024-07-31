@@ -10,6 +10,7 @@ import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.DealStatus;
 import com.fintech.deal.quartz.config.QuartzConfig;
 import com.fintech.deal.service.ContractorService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,6 +18,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -28,6 +35,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.UUID;
 
 import static org.mockito.Mockito.doNothing;
@@ -67,6 +75,16 @@ class ContractorControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @BeforeEach
+    void setupSecurityContext() {
+        UserDetails user = User.withUsername("testUser")
+                .password("password")
+                .authorities(new SimpleGrantedAuthority("SUPERUSER"))
+                .build();
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
+        SecurityContextHolder.setContext(context);
+    }
     @Test
     public void testControllerCreatesNewContractor() throws Exception {
         DealContractor sampleContractor = buildSampleContractor();

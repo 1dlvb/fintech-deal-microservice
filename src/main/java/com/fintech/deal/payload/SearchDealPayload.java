@@ -79,6 +79,9 @@ public class SearchDealPayload {
                 example = "Contractor X")
         private String contractorSearchValue;
 
+        /**
+         * @return true if all fields are null
+         */
         public boolean isEmpty() {
                 return  (id == null
                         && description == null
@@ -94,6 +97,9 @@ public class SearchDealPayload {
                         && contractorSearchValue == null);
         }
 
+        /**
+         * @return true if all fields except type are null
+         */
         public boolean isEmptyExceptType() {
 
           return (id == null
