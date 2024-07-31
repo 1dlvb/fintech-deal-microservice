@@ -125,6 +125,11 @@
             <artifactId>audit-lib-spring-boot-autoconfigure</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.onedlvb</groupId>
+            <artifactId>jwt-lib-spring-boot-autoconfigure</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
