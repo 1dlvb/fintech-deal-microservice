@@ -82,7 +82,6 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
      * This method retrieves all failed messages, attempts to resend them, and updates their status
      * based on the outcome of the resend attempt.
      */
-    @AuditLog(logLevel = LogLevel.INFO)
     public void resendFailedMessage() {
         List<ContractorOutboxMessage> failedMessages = contractorOutboxRepository.findBySentFalse();
         Collections.reverse(failedMessages);
