@@ -1,4 +1,4 @@
-package com.fintech.deal.security.config;
+package com.fintech.deal.config;
 
 import com.onedlvb.jwtlib.filter.JWTAuthenticationFilter;
 import com.onedlvb.jwtlib.util.Roles;
