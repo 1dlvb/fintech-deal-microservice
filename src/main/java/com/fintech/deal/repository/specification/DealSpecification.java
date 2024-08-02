@@ -5,6 +5,7 @@ import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.DealContractorRole;
 import com.fintech.deal.model.DealType;
 import com.fintech.deal.payload.SearchDealPayload;
+import com.fintech.deal.util.DealTypeEnum;
 import com.fintech.deal.util.WildcatEnhancer;
 import com.onedlvb.jwtlib.util.Roles;
 import com.onedlvb.jwtlib.util.SecurityUtil;
@@ -28,6 +29,9 @@ import java.util.stream.Stream;
  * @author Matushkin Anton
  */
 public final class DealSpecification {
+
+    private static final DealType CREDIT_TYPE = DealType.builder().id(DealTypeEnum.CREDIT.name()).build();
+    private static final DealType OVERDRAFT_TYPE = DealType.builder().id(DealTypeEnum.OVERDRAFT.name()).build();
 
     private DealSpecification() {}
 
@@ -207,10 +211,10 @@ public final class DealSpecification {
 
         List<DealType> types = new ArrayList<>();
         if (hasCreditRole) {
-            types.add(DealType.builder().id("CREDIT").build());
+            types.add(CREDIT_TYPE);
         }
         if (hasOverdraftRole) {
-            types.add(DealType.builder().id("OVERDRAFT").build());
+            types.add(OVERDRAFT_TYPE);
         }
 
         if (!types.isEmpty()) {
@@ -237,15 +241,15 @@ public final class DealSpecification {
 
         if (hasCreditRole && hasOverdraftRole) {
             boolean hasRelevantType = types.stream().allMatch(type ->
-                    "CREDIT".equals(type.getId()) || "OVERDRAFT".equals(type.getId())
+                    CREDIT_TYPE.getId().equals(type.getId()) || OVERDRAFT_TYPE.getId().equals(type.getId())
             );
             payload = SearchDealPayload.builder().type(types).build();
             return hasRelevantType ? payload : null;
         } else if (hasCreditRole) {
-            boolean hasCreditType = types.stream().allMatch(type -> "CREDIT".equals(type.getId()));
+            boolean hasCreditType = types.stream().allMatch(type -> CREDIT_TYPE.getId().equals(type.getId()));
             return hasCreditType ? payload : null;
         } else if (hasOverdraftRole) {
-            boolean hasOverdraftType = types.stream().allMatch(type -> "OVERDRAFT".equals(type.getId()));
+            boolean hasOverdraftType = types.stream().allMatch(type -> OVERDRAFT_TYPE.getId().equals(type.getId()));
             return hasOverdraftType ? payload : null;
         }
 
