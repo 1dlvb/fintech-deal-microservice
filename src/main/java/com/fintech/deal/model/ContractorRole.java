@@ -32,6 +32,6 @@ public class ContractorRole {
     private String category;
 
     @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
+    private boolean isActive = true;
 
 }
