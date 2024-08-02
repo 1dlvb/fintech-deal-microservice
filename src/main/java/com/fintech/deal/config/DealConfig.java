@@ -1,8 +1,11 @@
 package com.fintech.deal.config;
 
 import com.fintech.deal.auditor.AuditorAwareImpl;
+import com.fintech.deal.filter.JwtFilter;
+import com.fintech.deal.service.TokenService;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -29,6 +32,14 @@ public class DealConfig {
                         .description("An API for serving operations with deals.")
                         .version("0.0.1-SNAPSHOT")
                 );
+    }
+
+    @Bean
+    public FilterRegistrationBean<JwtFilter> jwtTokenFilter(TokenService tokenService) {
+        FilterRegistrationBean<JwtFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new JwtFilter(tokenService));
+        registrationBean.addUrlPatterns("/*");
+        return registrationBean;
     }
 
 }
