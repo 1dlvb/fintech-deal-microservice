@@ -55,7 +55,7 @@ public class ContractorServiceImpl implements ContractorService {
     public ContractorDTO saveContractor(ContractorDTO contractorDTO) {
         DealContractor contractor = ContractorDTO.fromDTO(contractorDTO, dealService);
 
-        if (contractor.getMain() && contractorRepository.existsByDealIdAndMainTrue(contractor.getDeal().getId())) {
+        if (contractor.isMain() && contractorRepository.existsByDealIdAndMainTrue(contractor.getDeal().getId())) {
             throw new IllegalStateException("Only one record can have main = true for each deal_id");
         }
 
@@ -80,8 +80,8 @@ public class ContractorServiceImpl implements ContractorService {
         Optional<DealContractor> contractorOptional = contractorRepository.findById(id);
         DealContractor contractor = contractorOptional.orElseThrow(() ->
                 new EntityNotFoundException("Contractor not found for ID: " + id));
-        if (contractor.getIsActive()) {
-            contractor.setIsActive(false);
+        if (contractor.isActive()) {
+            contractor.setActive(false);
             contractorRepository.save(contractor);
         } else {
             throw new NotActiveException("Contractor is not active");
@@ -114,7 +114,7 @@ public class ContractorServiceImpl implements ContractorService {
         Optional<DealContractorRole> roleOptional = dealContractorRoleRepository.findById(id);
         DealContractorRole role = roleOptional.orElse(null);
         if (role != null) {
-            role.setIsActive(false);
+            role.setActive(false);
             dealContractorRoleRepository.save(role);
         } else {
             throw new EntityNotFoundException("Role of contractor with ID: " + id + " not found.");
@@ -125,9 +125,9 @@ public class ContractorServiceImpl implements ContractorService {
         existingContractor.setDeal(newContractorData.getDeal());
         existingContractor.setContractorId(newContractorData.getContractorId());
         existingContractor.setName(newContractorData.getName());
-        existingContractor.setMain(newContractorData.getMain());
+        existingContractor.setMain(newContractorData.isMain());
         existingContractor.setInn(newContractorData.getInn());
-        existingContractor.setIsActive(newContractorData.getIsActive());
+        existingContractor.setActive(newContractorData.isActive());
     }
 
     private ContractorDTO getDtoWithRoles(DealContractor contractor, UUID id) {
@@ -138,7 +138,7 @@ public class ContractorServiceImpl implements ContractorService {
     }
 
     private void updateActiveMainBorrowerInContractorService(DealContractor contractor, boolean hasMainDeals) {
-        if (contractor.getMain() != null && contractor.getMain()
+        if (contractor.isActive()
                 && contractorRepository.existsOtherDealsByContractorWhereMainIsTrueId(contractor.getContractorId())) {
             outboxService.updateMainBorrower(contractor, hasMainDeals, WhenUpdateMainBorrowerInvoked.ON_DELETE);
         }

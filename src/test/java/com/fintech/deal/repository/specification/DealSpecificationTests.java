@@ -13,23 +13,23 @@ import com.fintech.deal.quartz.config.QuartzConfig;
 import com.fintech.deal.repository.DealRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -44,12 +44,12 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringJUnitConfig
+@SpringBootTest
 @ActiveProfiles("test")
 @Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@DataJpaTest
 @Testcontainers
+@Transactional
 class DealSpecificationTests {
 
     @Container
@@ -72,7 +72,7 @@ class DealSpecificationTests {
     private EntityManager entityManager;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         DealType dealType = new DealType("CREDIT", "credit", true);
         entityManager.persist(dealType);
 
@@ -111,7 +111,7 @@ class DealSpecificationTests {
         DealContractorRole dealContractorRole = new DealContractorRole();
         dealContractorRole.setDealContractor(dealContractor);
         dealContractorRole.setContractorRole(contractorRole);
-        dealContractorRole.setIsActive(true);
+        dealContractorRole.setActive(true);
         entityManager.persist(dealContractorRole);
 
         entityManager.flush();
@@ -129,7 +129,7 @@ class DealSpecificationTests {
     }
 
     @Test
-    public void testSearchDealsWithAllFilters() {
+    void testSearchDealsWithAllFilters() {
         setupSecurityContext("SUPERUSER");
         SearchDealPayload payload = new SearchDealPayload(
                 null,
@@ -152,7 +152,7 @@ class DealSpecificationTests {
     }
 
     @Test
-    public void testSearchDealsWithCreditRoleAndPayloadIsFullReturnsEmptyList() {
+    void testSearchDealsWithCreditRoleAndPayloadIsFullReturnsEmptyList() {
         setupSecurityContext("CREDIT_USER");
 
         SearchDealPayload payload = new SearchDealPayload(
@@ -175,7 +175,7 @@ class DealSpecificationTests {
         assertTrue(results.isEmpty());
     }
     @Test
-    public void testSearchDealsWithCreditRoleAndPayloadIsEmpty() {
+    void testSearchDealsWithCreditRoleAndPayloadIsEmpty() {
         setupSecurityContext("CREDIT_USER");
 
         SearchDealPayload payload = SearchDealPayload.builder().build();
@@ -185,7 +185,7 @@ class DealSpecificationTests {
         assertFalse(results.isEmpty());
     }
     @Test
-    public void testSearchDealsWithCreditRoleAndPayloadHasTypeCredit() {
+    void testSearchDealsWithCreditRoleAndPayloadHasTypeCredit() {
         setupSecurityContext("CREDIT_USER");
 
         SearchDealPayload payload = SearchDealPayload.builder().type(
@@ -196,7 +196,7 @@ class DealSpecificationTests {
         assertFalse(results.isEmpty());
     }
     @Test
-    public void testSearchDealsWithCreditRoleAndPayloadHasTypeOverdraft() {
+    void testSearchDealsWithCreditRoleAndPayloadHasTypeOverdraft() {
         setupSecurityContext("CREDIT_USER");
 
         SearchDealPayload payload = SearchDealPayload.builder().type(
@@ -208,7 +208,7 @@ class DealSpecificationTests {
     }
 
     @Test
-    public void testSearchDealsWithOverdraftRoleAndPayloadIsFullReturnsEmptyList() {
+    void testSearchDealsWithOverdraftRoleAndPayloadIsFullReturnsEmptyList() {
         setupSecurityContext("OVERDRAFT_USER");
 
         SearchDealPayload payload = new SearchDealPayload(
@@ -232,7 +232,7 @@ class DealSpecificationTests {
     }
 
     @Test
-    public void testSearchDealsWithBothRolesAndPayloadIsFullReturnsEmptyList() {
+    void testSearchDealsWithBothRolesAndPayloadIsFullReturnsEmptyList() {
         setupSecurityContext("CREDIT_USER", "OVERDRAFT_USER");
 
         SearchDealPayload payload = new SearchDealPayload(

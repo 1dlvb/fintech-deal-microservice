@@ -13,16 +13,16 @@ import com.fintech.deal.model.MessageStatus;
 import com.fintech.deal.quartz.config.QuartzConfig;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -33,12 +33,12 @@ import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-@SpringJUnitConfig
+@SpringBootTest
 @ActiveProfiles("test")
 @Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@DataJpaTest
 @Testcontainers
+@Transactional
 class ContractorOutboxRepositoryTests {
     @Container
     public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:latest")
@@ -106,7 +106,7 @@ class ContractorOutboxRepositoryTests {
         DealContractorRole dealContractorRole = new DealContractorRole();
         dealContractorRole.setDealContractor(dealContractor);
         dealContractorRole.setContractorRole(contractorRole);
-        dealContractorRole.setIsActive(true);
+        dealContractorRole.setActive(true);
         entityManager.persist(dealContractorRole);
 
         entityManager.flush();

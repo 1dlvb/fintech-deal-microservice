@@ -85,13 +85,13 @@ class ContractorServiceImplTests {
         UUID contractorId = UUID.randomUUID();
         DealContractor contractor = new DealContractor();
         contractor.setId(contractorId);
-        contractor.setIsActive(true);
+        contractor.setActive(true);
         when(repository.findById(any(UUID.class))).thenReturn(Optional.of(contractor));
 
         contractorService.deleteContractor(contractorId);
 
         verify(repository).save(contractor);
-        assertFalse(contractor.getIsActive());
+        assertFalse(contractor.isActive());
     }
 
     @Test
@@ -99,7 +99,7 @@ class ContractorServiceImplTests {
         UUID contractorId = UUID.randomUUID();
         DealContractor contractor = new DealContractor();
         contractor.setId(contractorId);
-        contractor.setIsActive(false);
+        contractor.setActive(false);
         when(repository.findById(any(UUID.class))).thenReturn(Optional.of(contractor));
 
         NotActiveException thrown = assertThrows(NotActiveException.class, () ->
@@ -147,7 +147,7 @@ class ContractorServiceImplTests {
         contractorService.deleteRoleByDealContractorRoleId(roleId);
 
         verify(dealContractorRoleRepository).save(role);
-        assertFalse(role.getIsActive());
+        assertFalse(role.isActive());
     }
 
     @Test

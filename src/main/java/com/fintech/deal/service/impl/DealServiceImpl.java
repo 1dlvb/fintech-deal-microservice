@@ -147,7 +147,7 @@ public class DealServiceImpl implements DealService {
         existingDeal.setStatus(newDealData.getStatus());
         existingDeal.setSum(newDealData.getSum());
         existingDeal.setCloseDt(newDealData.getCloseDt());
-        existingDeal.setIsActive(newDealData.getIsActive());
+        existingDeal.setActive(newDealData.isActive());
     }
 
     private ContractorWithNoDealIdDTO getContractorDtoWithRoles(DealContractor contractor, UUID id) {
@@ -159,7 +159,7 @@ public class DealServiceImpl implements DealService {
 
     private void updateActiveMainBorrowerInContractorService(DealContractor dc, String status, boolean hasMainDeals) {
         if (contractorRepository.countDealsWithStatusActiveByContractorId(dc.getContractorId(), status) == 1
-                && dc.getMain()) {
+                && dc.isMain()) {
             if (status.equals(StatusEnum.ACTIVE.name())) {
                 outboxService.updateMainBorrower(dc, hasMainDeals, WhenUpdateMainBorrowerInvoked.ON_UPDATE_STATUS_ACTIVE);
             } else if (status.equals(StatusEnum.CLOSED.name())) {
