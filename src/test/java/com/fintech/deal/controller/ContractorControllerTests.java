@@ -85,7 +85,7 @@ class ContractorControllerTests {
         SecurityContextHolder.setContext(context);
     }
     @Test
-    public void testControllerCreatesNewContractor() throws Exception {
+    void testControllerCreatesNewContractor() throws Exception {
         DealContractor sampleContractor = buildSampleContractor();
         ContractorDTO contractorDTO = ContractorDTO.toDTO(sampleContractor);
         when(contractorService.saveContractor(contractorDTO)).thenReturn(contractorDTO);
@@ -97,7 +97,7 @@ class ContractorControllerTests {
                                         .dealId(sampleContractor.getDeal().getId())
                                         .contractorId(sampleContractor.getContractorId())
                                         .name(sampleContractor.getName())
-                                        .main(sampleContractor.getMain())
+                                        .main(sampleContractor.isMain())
                                         .inn(sampleContractor.getInn())
                                         .build()
                         )))
@@ -109,7 +109,7 @@ class ContractorControllerTests {
 
 
     @Test
-    public void testDeleteContractor() throws Exception, NotActiveException {
+    void testDeleteContractor() throws Exception {
         UUID contractorId = UUID.randomUUID();
 
         doNothing().when(contractorService).deleteContractor(contractorId);
@@ -120,7 +120,7 @@ class ContractorControllerTests {
     }
 
     @Test
-    public void testDeleteContractorNotActive() throws Exception, NotActiveException {
+    void testDeleteContractorNotActive() throws Exception {
         UUID contractorId = UUID.randomUUID();
 
         doThrow(new NotActiveException("Contractor is not active")).when(contractorService).deleteContractor(contractorId);

@@ -81,7 +81,7 @@ class DealControllerTests {
     }
 
     @Test
-    public void testSaveDeal() throws Exception {
+    void testSaveDeal() throws Exception {
         SaveOrUpdateDealDTO saveOrUpdateDealDTO = new SaveOrUpdateDealDTO();
         saveOrUpdateDealDTO.setDescription("description");
         saveOrUpdateDealDTO.setAgreementNumber("123456");
@@ -101,7 +101,7 @@ class DealControllerTests {
     }
 
     @Test
-    public void testChangeStatus() throws Exception {
+    void testChangeStatus() throws Exception {
         ChangeStatusOfDealDTO changeStatusOfDealDTO = new ChangeStatusOfDealDTO();
         ResponseDealDTO responseDealDTO = new ResponseDealDTO();
 
@@ -116,7 +116,7 @@ class DealControllerTests {
     }
 
     @Test
-    public void testGetDealById() throws Exception {
+    void testGetDealById() throws Exception {
         UUID dealId = UUID.randomUUID();
         DealWithContractorsDTO dealWithContractorsDTO = new DealWithContractorsDTO();
 
@@ -127,6 +127,5 @@ class DealControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(dealWithContractorsDTO)));
     }
-
 
 }

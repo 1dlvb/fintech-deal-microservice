@@ -99,7 +99,7 @@ class RoleControllerTests {
                 .contractorId(contractor.getContractorId())
                 .dealId(contractor.getDeal().getId())
                 .inn(contractor.getInn())
-                .main(contractor.getMain())
+                .main(contractor.isMain())
                 .roles(Collections.singletonList(role))
                 .build();
         when(contractorService.addRole(UUID.fromString(contractor.getContractorId()), roleDTO))
