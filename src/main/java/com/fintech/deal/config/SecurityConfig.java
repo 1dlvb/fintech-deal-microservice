@@ -1,7 +1,7 @@
 package com.fintech.deal.config;
 
 import com.onedlvb.jwtlib.filter.JWTAuthenticationFilter;
-import com.onedlvb.jwtlib.util.Roles;
+import com.onedlvb.jwtlib.util.RolesEnum;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -36,22 +36,22 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/deal/search").hasAnyAuthority(
-                                Roles.CREDIT_USER.name(),
-                                Roles.OVERDRAFT_USER.name(),
-                                Roles.SUPERUSER.name(),
-                                Roles.DEAL_SUPERUSER.name()
+                                RolesEnum.CREDIT_USER.name(),
+                                RolesEnum.OVERDRAFT_USER.name(),
+                                RolesEnum.SUPERUSER.name(),
+                                RolesEnum.DEAL_SUPERUSER.name()
                         )
                         .requestMatchers(HttpMethod.GET, "/deal/**").hasAnyAuthority(
-                                Roles.USER.name(),
-                                Roles.CREDIT_USER.name(),
-                                Roles.OVERDRAFT_USER.name(),
-                                Roles.DEAL_SUPERUSER.name(),
-                                Roles.CONTRACTOR_SUPERUSER.name(),
-                                Roles.SUPERUSER.name(),
-                                Roles.CONTRACTOR_RUS.name()
+                                RolesEnum.USER.name(),
+                                RolesEnum.CREDIT_USER.name(),
+                                RolesEnum.OVERDRAFT_USER.name(),
+                                RolesEnum.DEAL_SUPERUSER.name(),
+                                RolesEnum.CONTRACTOR_SUPERUSER.name(),
+                                RolesEnum.SUPERUSER.name(),
+                                RolesEnum.CONTRACTOR_RUS.name()
                         ).requestMatchers("/**").hasAnyAuthority(
-                                Roles.SUPERUSER.name(),
-                                Roles.DEAL_SUPERUSER.name())
+                                RolesEnum.SUPERUSER.name(),
+                                RolesEnum.DEAL_SUPERUSER.name())
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(manager ->

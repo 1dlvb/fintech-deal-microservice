@@ -7,7 +7,7 @@ import com.fintech.deal.model.DealType;
 import com.fintech.deal.payload.SearchDealPayload;
 import com.fintech.deal.util.DealTypeEnum;
 import com.fintech.deal.util.WildcatEnhancer;
-import com.onedlvb.jwtlib.util.Roles;
+import com.onedlvb.jwtlib.util.RolesEnum;
 import com.onedlvb.jwtlib.util.SecurityUtil;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Join;
@@ -180,8 +180,8 @@ public final class DealSpecification {
      * @return The modified payload or null based on the user's roles and payload content.
      */
     private static SearchDealPayload roleBasedPayloadModification(SearchDealPayload payload) {
-        boolean hasSuperuser = SecurityUtil.hasRole(Roles.SUPERUSER);
-        boolean hasDealSuperuser = SecurityUtil.hasRole(Roles.DEAL_SUPERUSER);
+        boolean hasSuperuser = SecurityUtil.hasRole(RolesEnum.SUPERUSER);
+        boolean hasDealSuperuser = SecurityUtil.hasRole(RolesEnum.DEAL_SUPERUSER);
 
         if (hasSuperuser || hasDealSuperuser) {
             return payload;
@@ -193,8 +193,8 @@ public final class DealSpecification {
         if (!payload.isEmptyExceptType()) {
             return null;
         }
-        boolean hasCreditRole = SecurityUtil.hasRole(Roles.CREDIT_USER);
-        boolean hasOverdraftRole = SecurityUtil.hasRole(Roles.OVERDRAFT_USER);
+        boolean hasCreditRole = SecurityUtil.hasRole(RolesEnum.CREDIT_USER);
+        boolean hasOverdraftRole = SecurityUtil.hasRole(RolesEnum.OVERDRAFT_USER);
 
         return handleNonEmptyPayload(payload, hasCreditRole, hasOverdraftRole);
     }
@@ -206,8 +206,8 @@ public final class DealSpecification {
      * @return The modified payload or null if the user has no relevant roles.
      */
     private static SearchDealPayload handleEmptyExceptTypePayload() {
-        boolean hasCreditRole = SecurityUtil.hasRole(Roles.CREDIT_USER);
-        boolean hasOverdraftRole = SecurityUtil.hasRole(Roles.OVERDRAFT_USER);
+        boolean hasCreditRole = SecurityUtil.hasRole(RolesEnum.CREDIT_USER);
+        boolean hasOverdraftRole = SecurityUtil.hasRole(RolesEnum.OVERDRAFT_USER);
 
         List<DealType> types = new ArrayList<>();
         if (hasCreditRole) {
