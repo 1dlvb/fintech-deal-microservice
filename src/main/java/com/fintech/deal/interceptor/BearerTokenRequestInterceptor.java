@@ -22,9 +22,10 @@ public class BearerTokenRequestInterceptor implements RequestInterceptor {
     @Override
     public void apply(RequestTemplate template) {
         final String authorization = HttpHeaders.AUTHORIZATION;
-        if (tokenService.getToken() != null) {
+        String token = tokenService.getToken();
+        if (token != null) {
                 template.header(authorization);
-                template.header(authorization, "Bearer " + tokenService.getToken());
+                template.header(authorization, "Bearer " + token);
         }
     }
 
