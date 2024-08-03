@@ -37,6 +37,6 @@ public class DealContractorRole {
     private ContractorRole contractorRole;
 
     @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
+    private boolean isActive = true;
 
 }

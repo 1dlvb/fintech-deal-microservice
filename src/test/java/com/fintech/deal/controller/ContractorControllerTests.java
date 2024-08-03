@@ -10,6 +10,7 @@ import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.DealStatus;
 import com.fintech.deal.quartz.config.QuartzConfig;
 import com.fintech.deal.service.ContractorService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,6 +18,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -67,8 +74,18 @@ class ContractorControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @BeforeEach
+    void setupSecurityContext() {
+        UserDetails user = User.withUsername("testUser")
+                .password("password")
+                .authorities(new SimpleGrantedAuthority("SUPERUSER"))
+                .build();
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
+        SecurityContextHolder.setContext(context);
+    }
     @Test
-    public void testControllerCreatesNewContractor() throws Exception {
+    void testControllerCreatesNewContractor() throws Exception {
         DealContractor sampleContractor = buildSampleContractor();
         ContractorDTO contractorDTO = ContractorDTO.toDTO(sampleContractor);
         when(contractorService.saveContractor(contractorDTO)).thenReturn(contractorDTO);
@@ -80,7 +97,7 @@ class ContractorControllerTests {
                                         .dealId(sampleContractor.getDeal().getId())
                                         .contractorId(sampleContractor.getContractorId())
                                         .name(sampleContractor.getName())
-                                        .main(sampleContractor.getMain())
+                                        .main(sampleContractor.isMain())
                                         .inn(sampleContractor.getInn())
                                         .build()
                         )))
@@ -92,7 +109,7 @@ class ContractorControllerTests {
 
 
     @Test
-    public void testDeleteContractor() throws Exception, NotActiveException {
+    void testDeleteContractor() throws Exception {
         UUID contractorId = UUID.randomUUID();
 
         doNothing().when(contractorService).deleteContractor(contractorId);
@@ -103,7 +120,7 @@ class ContractorControllerTests {
     }
 
     @Test
-    public void testDeleteContractorNotActive() throws Exception, NotActiveException {
+    void testDeleteContractorNotActive() throws Exception {
         UUID contractorId = UUID.randomUUID();
 
         doThrow(new NotActiveException("Contractor is not active")).when(contractorService).deleteContractor(contractorId);

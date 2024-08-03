@@ -58,7 +58,7 @@ public class DealContractor {
     private String inn;
 
     @Column(name = "main", nullable = false)
-    private Boolean main = false;
+    private boolean main = false;
 
     @CreatedDate
     @Column(name = "create_date", nullable = false)
@@ -77,7 +77,7 @@ public class DealContractor {
     private String modifyUserId;
 
     @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
+    private boolean isActive = true;
 
     @OneToMany(mappedBy = "dealContractor")
     @ToString.Exclude

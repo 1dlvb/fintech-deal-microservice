@@ -12,6 +12,7 @@ import com.fintech.deal.model.DealStatus;
 import com.fintech.deal.quartz.config.QuartzConfig;
 import com.fintech.deal.service.ContractorService;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -19,6 +20,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -67,9 +74,19 @@ class RoleControllerTests {
     @MockBean
     private ContractorService contractorService;
 
+    @BeforeEach
+    void setupSecurityContext() {
+        UserDetails user = User.withUsername("testUser")
+                .password("password")
+                .authorities(new SimpleGrantedAuthority("SUPERUSER"))
+                .build();
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
+        SecurityContextHolder.setContext(context);
+    }
 
     @Test
-    void testAddRole() throws Exception, NotActiveException {
+    void testAddRole() throws Exception {
         DealContractor contractor = buildSampleContractor();
         ContractorRole role = new ContractorRole(
                 "ROLE",
@@ -82,7 +99,7 @@ class RoleControllerTests {
                 .contractorId(contractor.getContractorId())
                 .dealId(contractor.getDeal().getId())
                 .inn(contractor.getInn())
-                .main(contractor.getMain())
+                .main(contractor.isMain())
                 .roles(Collections.singletonList(role))
                 .build();
         when(contractorService.addRole(UUID.fromString(contractor.getContractorId()), roleDTO))

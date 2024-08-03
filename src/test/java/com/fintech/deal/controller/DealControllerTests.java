@@ -7,10 +7,9 @@ import com.fintech.deal.dto.DealWithContractorsDTO;
 import com.fintech.deal.dto.ResponseDealDTO;
 import com.fintech.deal.dto.SaveOrUpdateDealDTO;
 import com.fintech.deal.feign.config.FeignConfig;
-import com.fintech.deal.model.Deal;
-import com.fintech.deal.model.DealStatus;
 import com.fintech.deal.quartz.config.QuartzConfig;
 import com.fintech.deal.service.DealService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,6 +17,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -27,9 +32,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
@@ -67,8 +69,19 @@ class DealControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @BeforeEach
+    void setupSecurityContext() {
+        UserDetails user = User.withUsername("testUser")
+                .password("password")
+                .authorities(new SimpleGrantedAuthority("SUPERUSER"))
+                .build();
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
+        SecurityContextHolder.setContext(context);
+    }
+
     @Test
-    public void testSaveDeal() throws Exception {
+    void testSaveDeal() throws Exception {
         SaveOrUpdateDealDTO saveOrUpdateDealDTO = new SaveOrUpdateDealDTO();
         saveOrUpdateDealDTO.setDescription("description");
         saveOrUpdateDealDTO.setAgreementNumber("123456");
@@ -88,7 +101,7 @@ class DealControllerTests {
     }
 
     @Test
-    public void testChangeStatus() throws Exception {
+    void testChangeStatus() throws Exception {
         ChangeStatusOfDealDTO changeStatusOfDealDTO = new ChangeStatusOfDealDTO();
         ResponseDealDTO responseDealDTO = new ResponseDealDTO();
 
@@ -103,7 +116,7 @@ class DealControllerTests {
     }
 
     @Test
-    public void testGetDealById() throws Exception {
+    void testGetDealById() throws Exception {
         UUID dealId = UUID.randomUUID();
         DealWithContractorsDTO dealWithContractorsDTO = new DealWithContractorsDTO();
 
@@ -113,21 +126,6 @@ class DealControllerTests {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(dealWithContractorsDTO)));
-    }
-
-
-    private Deal buildSampleDeal(String description) {
-        return Deal.builder()
-                .id(UUID.randomUUID())
-                .description(description)
-                .agreementNumber("AG-123456")
-                .agreementDate(LocalDate.now())
-                .agreementStartDt(LocalDateTime.now())
-                .availabilityDate(LocalDate.now().plusDays(1))
-                .status(DealStatus.builder().id("ACTIVE").name("Active").build())
-                .sum(BigDecimal.valueOf(10000.00))
-                .isActive(true)
-                .build();
     }
 
 }

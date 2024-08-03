@@ -92,7 +92,7 @@ public class Deal {
     private String modifyUserId;
 
     @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
+    private boolean isActive = true;
 
     @OneToMany(mappedBy = "deal")
     @ToString.Exclude

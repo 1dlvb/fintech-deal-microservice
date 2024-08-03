@@ -85,7 +85,7 @@ public class ContractorDTO {
                 .dealId(contractor.getDeal().getId())
                 .contractorId(contractor.getContractorId())
                 .name(contractor.getName())
-                .main(contractor.getMain())
+                .main(contractor.isMain())
                 .inn(contractor.getInn())
                 .build();
     }

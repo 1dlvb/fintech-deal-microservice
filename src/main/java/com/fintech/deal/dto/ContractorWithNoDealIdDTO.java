@@ -59,7 +59,7 @@ public class ContractorWithNoDealIdDTO {
                 .id(contractor.getId())
                 .contractorId(contractor.getContractorId())
                 .name(contractor.getName())
-                .main(contractor.getMain())
+                .main(contractor.isMain())
                 .inn(contractor.getInn())
                 .build();
     }

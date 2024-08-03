@@ -24,5 +24,15 @@
       "name": "deal.resend.failed.message.cron",
       "type": "java.lang.String",
       "description": "A cron expression for resending failed messages."
+    },
+    {
+      "name": "jwt-lib-spring-boot-starter.secret",
+      "type": "java.lang.String",
+      "description": "Description for jwt-lib-spring-boot-starter.secret."
+    },
+    {
+      "name": "jwt-lib-spring-boot-starter.algorithm",
+      "type": "java.lang.String",
+      "description": "Description for jwt-lib-spring-boot-starter.algorithm."
     }
   ] }

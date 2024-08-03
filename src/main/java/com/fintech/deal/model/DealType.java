@@ -28,6 +28,6 @@ public class DealType {
     private String name;
 
     @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
+    private boolean isActive = true;
 
 }
