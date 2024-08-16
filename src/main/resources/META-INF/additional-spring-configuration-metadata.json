@@ -49,5 +49,10 @@
       "name": "contractor.deals.queue",
       "type": "java.lang.String",
       "description": "Description for contractor.deals.queue."
+    },
+    {
+      "name": "rabbitmq.dead-letter.routing.key",
+      "type": "java.lang.String",
+      "description": "Description for rabbitmq.dead-letter.routing.key."
     }
   ] }
