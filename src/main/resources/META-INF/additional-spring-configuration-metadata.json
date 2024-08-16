@@ -44,5 +44,10 @@
       "name": "audit-lib-spring-boot-starter.kafka-transactional-id",
       "type": "java.lang.String",
       "description": "Description for audit-lib-spring-boot-starter.kafka-transactional-id."
+    },
+    {
+      "name": "contractor.deals.queue",
+      "type": "java.lang.String",
+      "description": "Description for contractor.deals.queue."
     }
   ] }
