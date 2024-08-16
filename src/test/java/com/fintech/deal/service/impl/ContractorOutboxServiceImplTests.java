@@ -1,9 +1,9 @@
 package com.fintech.deal.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fintech.deal.config.DealConfig;
 import com.fintech.deal.dto.MainBorrowerDTO;
-import com.fintech.deal.feign.ContractorFeignClient;
-import com.fintech.deal.feign.config.FeignConfig;
 import com.fintech.deal.model.ContractorOutboxMessage;
 import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
@@ -11,32 +11,42 @@ import com.fintech.deal.model.DealStatus;
 import com.fintech.deal.model.MessageStatus;
 import com.fintech.deal.quartz.config.QuartzConfig;
 import com.fintech.deal.repository.ContractorOutboxRepository;
+import com.fintech.deal.service.MessageSenderService;
 import com.fintech.deal.util.WhenUpdateMainBorrowerInvoked;
+import lombok.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
 @ActiveProfiles("test")
-@Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
+@Import({DealConfig.class, QuartzConfig.class})
 class ContractorOutboxServiceImplTests {
 
     @Mock
-    private ContractorFeignClient feignClient;
-
-    @Mock
     private ContractorOutboxRepository contractorOutboxRepository;
+    @Mock
+    private MessageSenderService messageSenderService;
+    @Mock
+    private ObjectMapper objectMapper;
 
     @InjectMocks
     private ContractorOutboxServiceImpl contractorOutboxService;
@@ -51,9 +61,6 @@ class ContractorOutboxServiceImplTests {
         DealContractor contractor = new DealContractor();
         contractor.setContractorId("123");
 
-        ResponseEntity<Void> responseEntity = new ResponseEntity<>(HttpStatus.OK);
-        when(feignClient.updateActiveMainBorrower(any(MainBorrowerDTO.class))).thenReturn(responseEntity);
-
         contractorOutboxService.updateMainBorrower(contractor, true, WhenUpdateMainBorrowerInvoked.ON_UPDATE_STATUS_ACTIVE);
 
         ArgumentCaptor<ContractorOutboxMessage> captor = ArgumentCaptor.forClass(ContractorOutboxMessage.class);
@@ -67,24 +74,30 @@ class ContractorOutboxServiceImplTests {
     }
 
     @Test
-    void testUpdateMainBorrowerFailure() {
+    void testUpdateMainBorrowerFailure() throws JsonProcessingException {
         DealContractor contractor = new DealContractor();
-        contractor.setContractorId("123");
+        contractor.setId(UUID.randomUUID());
+        contractor.setMain(true);
 
-        ResponseEntity<Void> responseEntity = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        when(feignClient.updateActiveMainBorrower(any(MainBorrowerDTO.class))).thenReturn(responseEntity);
-        contractorOutboxService.updateMainBorrower(
-                contractor,
-                true,
+        doThrow(new RuntimeException("Sending failed")).when(messageSenderService).send(anyString());
+
+        when(objectMapper.writeValueAsString(any(MainBorrowerDTO.class)))
+                .thenReturn("{\"contractorId\":\"12345\",\"hasMainDeals\":true}");
+
+        contractorOutboxService.updateMainBorrower(contractor, contractor.isMain(),
                 WhenUpdateMainBorrowerInvoked.ON_UPDATE_STATUS_ACTIVE);
-        ArgumentCaptor<ContractorOutboxMessage> captor = ArgumentCaptor.forClass(ContractorOutboxMessage.class);
-        verify(contractorOutboxRepository).save(captor.capture());
 
-        ContractorOutboxMessage savedMessage = captor.getValue();
-        assertThat(savedMessage.getContractorId()).isEqualTo("123");
-        assertThat(savedMessage.isActiveMainBorrower()).isTrue();
-        assertThat(savedMessage.getStatus()).isEqualTo(MessageStatus.FAILED);
-        assertFalse(savedMessage.isSent());
+        ArgumentCaptor<ContractorOutboxMessage> messageCaptor = ArgumentCaptor.forClass(ContractorOutboxMessage.class);
+        verify(contractorOutboxRepository).save(messageCaptor.capture());
+
+        ContractorOutboxMessage capturedMessage = messageCaptor.getValue();
+
+        assertEquals(contractor.getContractorId(), capturedMessage.getContractorId());
+        assertFalse(capturedMessage.isSent());
+        assertEquals(MessageStatus.FAILED, capturedMessage.getStatus());
+        assertNotNull(capturedMessage.getException());
+        assertTrue(capturedMessage.getException().contains("Sending failed"));
+
     }
 
     @Test
@@ -104,8 +117,6 @@ class ContractorOutboxServiceImplTests {
         deal.setStatus(closedStatus);
 
         when(contractorOutboxRepository.findDealsByContractorId("123")).thenReturn(deal);
-        when(feignClient.updateActiveMainBorrower(any(MainBorrowerDTO.class)))
-                .thenReturn(new ResponseEntity<>(HttpStatus.OK));
 
         contractorOutboxService.resendFailedMessage();
 

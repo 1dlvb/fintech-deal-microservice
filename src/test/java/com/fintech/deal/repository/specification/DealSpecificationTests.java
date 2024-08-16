@@ -1,7 +1,6 @@
 package com.fintech.deal.repository.specification;
 
 import com.fintech.deal.config.DealConfig;
-import com.fintech.deal.feign.config.FeignConfig;
 import com.fintech.deal.model.ContractorRole;
 import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
@@ -46,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
+@Import({DealConfig.class, QuartzConfig.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
 @Transactional

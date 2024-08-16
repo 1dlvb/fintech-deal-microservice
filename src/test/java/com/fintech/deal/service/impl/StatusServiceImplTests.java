@@ -1,7 +1,6 @@
 package com.fintech.deal.service.impl;
 
 import com.fintech.deal.config.DealConfig;
-import com.fintech.deal.feign.config.FeignConfig;
 import com.fintech.deal.model.DealStatus;
 import com.fintech.deal.quartz.config.QuartzConfig;
 import com.fintech.deal.repository.StatusRepository;
@@ -25,7 +24,7 @@ import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
-@Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
+@Import({DealConfig.class, QuartzConfig.class})
 class StatusServiceImplTests {
 
     @Mock

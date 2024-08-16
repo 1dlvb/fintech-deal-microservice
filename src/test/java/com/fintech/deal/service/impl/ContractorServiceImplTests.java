@@ -1,10 +1,10 @@
 package com.fintech.deal.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fintech.deal.config.DealConfig;
 import com.fintech.deal.dto.ContractorDTO;
 import com.fintech.deal.dto.RoleDTO;
 import com.fintech.deal.exception.NotActiveException;
-import com.fintech.deal.feign.config.FeignConfig;
 import com.fintech.deal.model.ContractorRole;
 import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 @ActiveProfiles("test")
-@Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
+@Import({DealConfig.class, QuartzConfig.class})
 class ContractorServiceImplTests {
 
     @Mock
@@ -81,7 +81,7 @@ class ContractorServiceImplTests {
     }
 
     @Test
-    void testDeleteContractor() throws NotActiveException {
+    void testDeleteContractor() throws NotActiveException, JsonProcessingException {
         UUID contractorId = UUID.randomUUID();
         DealContractor contractor = new DealContractor();
         contractor.setId(contractorId);
