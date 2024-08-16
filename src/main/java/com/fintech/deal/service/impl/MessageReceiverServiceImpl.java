@@ -41,7 +41,7 @@ public class MessageReceiverServiceImpl implements MessageReceiverService {
             contractorService.updateContractorByReceivedMessage(contractorMap);
             channel.basicAck(tag, false);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             channel.basicReject(tag, false);
         }
     }
