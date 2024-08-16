@@ -1,5 +1,6 @@
 package com.fintech.deal.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.util.WhenUpdateMainBorrowerInvoked;
 
@@ -16,7 +17,7 @@ public interface ContractorOutboxService {
      * @param whenInvoked An instance of {@link WhenUpdateMainBorrowerInvoked} to be invoked
      * when the update operation is complete.
      */
-    void updateMainBorrower(DealContractor contractor, boolean hasMainDeals, WhenUpdateMainBorrowerInvoked whenInvoked);
+    void updateMainBorrower(DealContractor contractor, boolean hasMainDeals, WhenUpdateMainBorrowerInvoked whenInvoked) throws JsonProcessingException;
 
     /**
      * Resends messages that failed to be sent previously.
