@@ -1,5 +1,6 @@
 package com.fintech.deal.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fintech.deal.dto.ResponseDealDTO;
 import com.fintech.deal.dto.ChangeStatusOfDealDTO;
 import com.fintech.deal.dto.DealWithContractorsDTO;
@@ -33,7 +34,7 @@ public interface DealService {
      *                               deal ID and the new status.
      * @return The updated {@link ResponseDealDTO}.
      */
-    ResponseDealDTO changeStatus(ChangeStatusOfDealDTO changeStatusOfDealDTO);
+    ResponseDealDTO changeStatus(ChangeStatusOfDealDTO changeStatusOfDealDTO) throws JsonProcessingException;
 
     /**
      * Retrieves a deal by its unique identifier.

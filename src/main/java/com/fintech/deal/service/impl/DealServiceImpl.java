@@ -1,5 +1,6 @@
 package com.fintech.deal.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fintech.deal.dto.ContractorWithNoDealIdDTO;
 import com.fintech.deal.dto.ResponseDealDTO;
 import com.fintech.deal.dto.ChangeStatusOfDealDTO;
@@ -76,7 +77,7 @@ public class DealServiceImpl implements DealService {
 
     @Override
     @AuditLog(logLevel = LogLevel.INFO)
-    public ResponseDealDTO changeStatus(ChangeStatusOfDealDTO changeStatusOfDealDTO) {
+    public ResponseDealDTO changeStatus(ChangeStatusOfDealDTO changeStatusOfDealDTO) throws JsonProcessingException {
         UUID id = changeStatusOfDealDTO.getId();
 
         DealStatus status = statusService.getStatusById(changeStatusOfDealDTO.getStatus().getId());
@@ -157,7 +158,7 @@ public class DealServiceImpl implements DealService {
         return dto;
     }
 
-    private void updateActiveMainBorrowerInContractorService(DealContractor dc, String status, boolean hasMainDeals) {
+    private void updateActiveMainBorrowerInContractorService(DealContractor dc, String status, boolean hasMainDeals) throws JsonProcessingException {
         if (contractorRepository.countDealsWithStatusActiveByContractorId(dc.getContractorId(), status) == 1
                 && dc.isMain()) {
             if (status.equals(StatusEnum.ACTIVE.name())) {

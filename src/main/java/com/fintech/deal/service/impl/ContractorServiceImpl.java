@@ -1,5 +1,6 @@
 package com.fintech.deal.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fintech.deal.dto.ContractorDTO;
 import com.fintech.deal.dto.RoleDTO;
 import com.fintech.deal.exception.NotActiveException;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -76,7 +78,7 @@ public class ContractorServiceImpl implements ContractorService {
     @Override
     @Transactional
     @AuditLog(logLevel = LogLevel.INFO)
-    public void deleteContractor(UUID id) throws NotActiveException {
+    public void deleteContractor(UUID id) throws NotActiveException, JsonProcessingException {
         Optional<DealContractor> contractorOptional = contractorRepository.findById(id);
         DealContractor contractor = contractorOptional.orElseThrow(() ->
                 new EntityNotFoundException("Contractor not found for ID: " + id));
@@ -121,6 +123,21 @@ public class ContractorServiceImpl implements ContractorService {
         }
     }
 
+    @Override
+    public List<DealContractor> findAllByContractorId(String id) {
+        return contractorRepository.findAllByContractorId(id);
+    }
+
+    @Override
+    @Transactional
+    public void updateContractorByReceivedMessage(Map<String, String> contractorMap) {
+        for (DealContractor dc: findAllByContractorId(contractorMap.get("id"))) {
+            dc.setName(contractorMap.get("name"));
+            dc.setInn(contractorMap.get("inn"));
+            saveContractor(ContractorDTO.toDTO(dc));
+        }
+    }
+
     private void updateProperties(DealContractor existingContractor, DealContractor newContractorData) {
         existingContractor.setDeal(newContractorData.getDeal());
         existingContractor.setContractorId(newContractorData.getContractorId());
@@ -137,7 +154,7 @@ public class ContractorServiceImpl implements ContractorService {
         return dto;
     }
 
-    private void updateActiveMainBorrowerInContractorService(DealContractor contractor, boolean hasMainDeals) {
+    private void updateActiveMainBorrowerInContractorService(DealContractor contractor, boolean hasMainDeals) throws JsonProcessingException {
         if (contractor.isActive()
                 && contractorRepository.existsOtherDealsByContractorWhereMainIsTrueId(contractor.getContractorId())) {
             outboxService.updateMainBorrower(contractor, hasMainDeals, WhenUpdateMainBorrowerInvoked.ON_DELETE);
