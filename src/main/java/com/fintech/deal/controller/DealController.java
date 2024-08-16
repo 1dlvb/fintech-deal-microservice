@@ -1,8 +1,9 @@
 package com.fintech.deal.controller;
 
-import com.fintech.deal.dto.ResponseDealDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fintech.deal.dto.ChangeStatusOfDealDTO;
 import com.fintech.deal.dto.DealWithContractorsDTO;
+import com.fintech.deal.dto.ResponseDealDTO;
 import com.fintech.deal.dto.SaveOrUpdateDealDTO;
 import com.fintech.deal.payload.SearchDealPayload;
 import com.fintech.deal.service.DealService;
@@ -84,7 +85,11 @@ public class DealController {
                     content = @Content)
     })
     public ResponseEntity<ResponseDealDTO> changeStatus(@RequestBody ChangeStatusOfDealDTO statusDTO) {
-        return ResponseEntity.ok(service.changeStatus(statusDTO));
+        try {
+            return ResponseEntity.ok(service.changeStatus(statusDTO));
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     /**
