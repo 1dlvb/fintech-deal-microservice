@@ -155,6 +155,9 @@ databaseChangeLog:
                   name: modify_date
                   type: timestamp
               - column:
+                  name: modify_date_from_contractor_microservice
+                  type: timestamp
+              - column:
                   name: create_user_id
                   type: varchar(255)
               - column:

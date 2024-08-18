@@ -68,6 +68,9 @@ public class DealContractor {
     @Column(name = "modify_date")
     private LocalDateTime modifyDate;
 
+    @Column(name = "modify_date_from_contractor_microservice")
+    private LocalDateTime modifyDateFromContractorMicroservice;
+
     @CreatedBy
     @Column(name = "create_user_id")
     private String createUserId;

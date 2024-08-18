@@ -22,6 +22,9 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -57,21 +60,20 @@ public class ContractorServiceImpl implements ContractorService {
     public ContractorDTO saveContractor(ContractorDTO contractorDTO) {
         DealContractor contractor = ContractorDTO.fromDTO(contractorDTO, dealService);
 
-        if (contractor.isMain() && contractorRepository.existsByDealIdAndMainTrue(contractor.getDeal().getId())) {
-            throw new IllegalStateException("Only one record can have main = true for each deal_id");
-        }
-
         Optional<DealContractor> existingContractorOpt =
                 contractorRepository.findByDealIdAndContractorId(contractor.getDeal().getId(), contractor.getContractorId());
-
-
         if (existingContractorOpt.isPresent()) {
             DealContractor existingContractor = existingContractorOpt.get();
             updateProperties(existingContractor, contractor);
             contractor = contractorRepository.save(existingContractor);
         } else {
+            if (contractor.isMain() && contractorRepository.existsByDealIdAndMainTrue(contractor.getDeal().getId())) {
+                throw new IllegalStateException("Only one record can have main = true for each deal_id");
+            }
             contractor = contractorRepository.save(contractor);
         }
+
+
         return getDtoWithRoles(contractor, contractor.getId());
     }
 
@@ -131,10 +133,17 @@ public class ContractorServiceImpl implements ContractorService {
     @Override
     @Transactional
     public void updateContractorByReceivedMessage(Map<String, String> contractorMap) {
+        LocalDateTime messageCreationDateTime =
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(contractorMap.get("timestamp"))),
+                ZoneId.systemDefault());
         for (DealContractor dc: findAllByContractorId(contractorMap.get("id"))) {
             dc.setName(contractorMap.get("name"));
             dc.setInn(contractorMap.get("inn"));
-            saveContractor(ContractorDTO.toDTO(dc));
+            if (dc.getModifyDateFromContractorMicroservice() != null &&
+                    dc.getModifyDateFromContractorMicroservice().isBefore(messageCreationDateTime)) {
+                dc.setModifyDateFromContractorMicroservice(messageCreationDateTime);
+                saveContractor(ContractorDTO.toDTO(dc));
+            }
         }
     }
 
