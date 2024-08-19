@@ -137,10 +137,10 @@ public class ContractorServiceImpl implements ContractorService {
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(contractorMap.get("timestamp"))),
                 ZoneId.systemDefault());
         for (DealContractor dc: findAllByContractorId(contractorMap.get("id"))) {
-            dc.setName(contractorMap.get("name"));
-            dc.setInn(contractorMap.get("inn"));
-            if (dc.getModifyDateFromContractorMicroservice() != null &&
+            if (dc.getModifyDateFromContractorMicroservice() == null ||
                     dc.getModifyDateFromContractorMicroservice().isBefore(messageCreationDateTime)) {
+                dc.setName(contractorMap.get("name"));
+                dc.setInn(contractorMap.get("inn"));
                 dc.setModifyDateFromContractorMicroservice(messageCreationDateTime);
                 saveContractor(ContractorDTO.toDTO(dc));
             }
