@@ -1,6 +1,5 @@
 package com.fintech.deal.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fintech.deal.config.DealConfig;
 import com.fintech.deal.config.RabbitMqConfig;
 import com.fintech.deal.config.RabbitMqReceiverConfig;
