@@ -26,8 +26,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -158,4 +160,76 @@ class ContractorServiceImplTests {
         EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> contractorService.deleteRoleByDealContractorRoleId(roleId));
         assertEquals("Role of contractor with ID: " + roleId + " not found.", thrown.getMessage());
     }
+
+    @Test
+    void testUpdateContractorByReceivedMessageUpdatesContractor() {
+        UUID dealId = UUID.randomUUID();
+        Deal deal = new Deal();
+        deal.setId(dealId);
+
+        Map<String, String> contractorMap = new HashMap<>();
+        UUID id = UUID.randomUUID();
+        contractorMap.put("id", String.valueOf(id));
+        contractorMap.put("name", "new contractor name");
+        contractorMap.put("inn", "1234567890");
+        contractorMap.put("timestamp", String.valueOf(Instant.now().toEpochMilli()));
+
+        DealContractor existingContractor = new DealContractor();
+        existingContractor.setId(id);
+        existingContractor.setName("old contractor name");
+        existingContractor.setInn("0987654321");
+        existingContractor.setDeal(deal);
+        existingContractor.setModifyDateFromContractorMicroservice(LocalDateTime.now().minusDays(1));
+
+        when(repository.findAllByContractorId(String.valueOf(id)))
+                .thenReturn(Collections.singletonList(existingContractor));
+        when(dealService.getDealById(deal.getId())).thenReturn(deal);
+        when(repository.save(any(DealContractor.class))).thenReturn(existingContractor);
+
+        contractorService.updateContractorByReceivedMessage(contractorMap);
+
+        assertEquals("new contractor name", existingContractor.getName());
+        assertEquals("1234567890", existingContractor.getInn());
+
+        LocalDateTime messageCreationDateTime = LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(Long.parseLong(contractorMap.get("timestamp"))),
+                ZoneId.systemDefault());
+        assertEquals(messageCreationDateTime, existingContractor.getModifyDateFromContractorMicroservice());
+
+        verify(repository, times(1)).save(any(DealContractor.class));
+    }
+
+    @Test
+    void testUpdateContractorByReceivedMessageWhenDateIsOlderNotUpdates() {
+        UUID dealId = UUID.randomUUID();
+        Deal deal = new Deal();
+        deal.setId(dealId);
+
+        Map<String, String> contractorMap = new HashMap<>();
+        UUID id = UUID.randomUUID();
+        contractorMap.put("id", String.valueOf(id));
+        contractorMap.put("name", "new contractor name");
+        contractorMap.put("inn", "1234567890");
+        contractorMap.put("timestamp", String.valueOf(Instant.now().minusSeconds(3600).toEpochMilli()));
+
+        DealContractor existingContractor = new DealContractor();
+        existingContractor.setId(id);
+        existingContractor.setName("old contractor name");
+        existingContractor.setInn("0987654321");
+        existingContractor.setDeal(deal);
+        existingContractor.setModifyDateFromContractorMicroservice(LocalDateTime.now());
+
+        when(repository.findAllByContractorId(String.valueOf(id)))
+                .thenReturn(Collections.singletonList(existingContractor));
+        when(dealService.getDealById(deal.getId())).thenReturn(deal);
+        when(repository.save(any(DealContractor.class))).thenReturn(existingContractor);
+
+        contractorService.updateContractorByReceivedMessage(contractorMap);
+
+        assertEquals("old contractor name", existingContractor.getName());
+        assertEquals("0987654321", existingContractor.getInn());
+
+        verify(repository, times(0)).save(any(DealContractor.class));
+    }
+
 }
