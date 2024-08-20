@@ -17,6 +17,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * An implementation of {@link MessageReceiverService} interface.
+ * @author Matushkin Anton
+ */
 @Service
 @RequiredArgsConstructor
 public class MessageReceiverServiceImpl implements MessageReceiverService {

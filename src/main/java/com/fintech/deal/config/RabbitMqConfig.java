@@ -7,6 +7,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration class for setting up RabbitMQ components.
+ * @author Matushkin Anton
+ */
 @Configuration
 public class RabbitMqConfig {
 
@@ -22,11 +26,21 @@ public class RabbitMqConfig {
     @Value("${spring.rabbitmq.password}")
     private String password;
 
+    /**
+     * Defines a queue for processing active main borrower messages.
+     * <p>
+     * @return the configured {@link Queue} for active main borrowers.
+     */
     @Bean
     public Queue activeMainBorrowerQueue() {
         return new Queue(queueActiveMainBorrowerQueueName, true);
     }
 
+    /**
+     * Configures a {@link CachingConnectionFactory} for connecting to RabbitMQ.
+     * <p>
+     * @return the configured {@link CachingConnectionFactory}.
+     */
     @Bean
     public CachingConnectionFactory cachingConnectionFactory() {
         CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(uri);
@@ -35,6 +49,11 @@ public class RabbitMqConfig {
         return cachingConnectionFactory;
     }
 
+    /**
+     * Provides a {@link RabbitAdmin} instance for managing RabbitMQ resources.
+     * <p>
+     * @return the configured {@link RabbitAdmin}.
+     */
     @Bean
     public RabbitAdmin rabbitAdmin() {
         return new RabbitAdmin(cachingConnectionFactory());

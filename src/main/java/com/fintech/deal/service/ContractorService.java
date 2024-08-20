@@ -31,6 +31,11 @@ public interface ContractorService {
 
     List<DealContractor> findAllByContractorId(String id);
 
+    /**
+     * Updates contractor by received message from the RabbitMQ.
+     * <p>
+     * @param contractorMap map of contractor data. Such as id, active_main_borrower and timestamp
+     */
     void updateContractorByReceivedMessage(Map<String, String> contractorMap);
 
 }

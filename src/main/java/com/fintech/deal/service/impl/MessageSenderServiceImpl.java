@@ -7,6 +7,11 @@ import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+
+/**
+ * An implementation of {@link MessageSenderService} interface.
+ * @author Matushkin Anton
+ */
 @Service
 @RequiredArgsConstructor
 public class MessageSenderServiceImpl implements MessageSenderService {
