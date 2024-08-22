@@ -44,5 +44,25 @@
       "name": "audit-lib-spring-boot-starter.kafka-transactional-id",
       "type": "java.lang.String",
       "description": "Description for audit-lib-spring-boot-starter.kafka-transactional-id."
+    },
+    {
+      "name": "contractor.deals.queue",
+      "type": "java.lang.String",
+      "description": "Description for contractor.deals.queue."
+    },
+    {
+      "name": "rabbitmq.dead-letter.routing.key",
+      "type": "java.lang.String",
+      "description": "Description for rabbitmq.dead-letter.routing.key."
+    },
+    {
+      "name": "contractor.deals.routing.key",
+      "type": "java.lang.String",
+      "description": "Description for contractor.deals.routing.key."
+    },
+    {
+      "name": "rabbitmq.dead-letter.message.ttl",
+      "type": "java.lang.String",
+      "description": "Description for rabbitmq.dead-letter.message.ttl."
     }
   ] }

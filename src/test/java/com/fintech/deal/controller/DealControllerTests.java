@@ -6,7 +6,6 @@ import com.fintech.deal.dto.ChangeStatusOfDealDTO;
 import com.fintech.deal.dto.DealWithContractorsDTO;
 import com.fintech.deal.dto.ResponseDealDTO;
 import com.fintech.deal.dto.SaveOrUpdateDealDTO;
-import com.fintech.deal.feign.config.FeignConfig;
 import com.fintech.deal.quartz.config.QuartzConfig;
 import com.fintech.deal.service.DealService;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
+@Import({DealConfig.class, QuartzConfig.class})
 @SpringBootTest
 @Testcontainers
 class DealControllerTests {

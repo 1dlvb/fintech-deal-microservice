@@ -1,7 +1,6 @@
 package com.fintech.deal.repository;
 
 import com.fintech.deal.config.DealConfig;
-import com.fintech.deal.feign.config.FeignConfig;
 import com.fintech.deal.model.ContractorOutboxMessage;
 import com.fintech.deal.model.ContractorRole;
 import com.fintech.deal.model.Deal;
@@ -35,7 +34,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
+@Import({DealConfig.class, QuartzConfig.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
 @Transactional

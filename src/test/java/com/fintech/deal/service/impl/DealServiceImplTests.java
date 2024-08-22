@@ -1,11 +1,11 @@
 package com.fintech.deal.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fintech.deal.config.DealConfig;
 import com.fintech.deal.dto.ChangeStatusOfDealDTO;
 import com.fintech.deal.dto.DealWithContractorsDTO;
 import com.fintech.deal.dto.ResponseDealDTO;
 import com.fintech.deal.dto.SaveOrUpdateDealDTO;
-import com.fintech.deal.feign.config.FeignConfig;
 import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.DealStatus;
@@ -35,7 +35,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 
 @ActiveProfiles("test")
-@Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
+@Import({DealConfig.class, QuartzConfig.class})
 class DealServiceImplTests {
 
     @Mock
@@ -144,7 +144,7 @@ class DealServiceImplTests {
 
 
     @Test
-    void testChangeStatusSuccess() {
+    void testChangeStatusSuccess() throws JsonProcessingException {
         UUID dealId = UUID.randomUUID();
         ChangeStatusOfDealDTO changeStatusOfDealDTO = new ChangeStatusOfDealDTO();
         changeStatusOfDealDTO.setId(dealId);

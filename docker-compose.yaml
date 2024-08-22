@@ -13,6 +13,13 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=deal_db
     restart: always
+  rabbitmq:
+    image: rabbitmq:3.13.6-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "15672:15672"
+      - "5672:5672"
 
 volumes:
   db_data:

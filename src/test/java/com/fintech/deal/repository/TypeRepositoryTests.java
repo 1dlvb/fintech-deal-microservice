@@ -1,7 +1,6 @@
 package com.fintech.deal.repository;
 
 import com.fintech.deal.config.DealConfig;
-import com.fintech.deal.feign.config.FeignConfig;
 import com.fintech.deal.model.DealType;
 import com.fintech.deal.quartz.config.QuartzConfig;
 import jakarta.transaction.Transactional;
@@ -22,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
+@Import({DealConfig.class, QuartzConfig.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
 @Transactional

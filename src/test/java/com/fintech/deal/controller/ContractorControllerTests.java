@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fintech.deal.config.DealConfig;
 import com.fintech.deal.dto.ContractorDTO;
 import com.fintech.deal.exception.NotActiveException;
-import com.fintech.deal.feign.config.FeignConfig;
 import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.DealStatus;
@@ -48,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import({DealConfig.class, QuartzConfig.class, FeignConfig.class})
+@Import({DealConfig.class, QuartzConfig.class})
 @SpringBootTest
 @Testcontainers
 class ContractorControllerTests {

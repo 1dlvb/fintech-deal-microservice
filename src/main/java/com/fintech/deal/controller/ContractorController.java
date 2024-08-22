@@ -1,5 +1,6 @@
 package com.fintech.deal.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fintech.deal.dto.ContractorDTO;
 import com.fintech.deal.exception.NotActiveException;
 import com.fintech.deal.service.ContractorService;
@@ -72,7 +73,7 @@ public class ContractorController {
     public ResponseEntity<ContractorDTO> deleteContractor(@PathVariable UUID id) {
         try {
             service.deleteContractor(id);
-        } catch (NotActiveException e) {
+        } catch (NotActiveException | JsonProcessingException e) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.noContent().build();

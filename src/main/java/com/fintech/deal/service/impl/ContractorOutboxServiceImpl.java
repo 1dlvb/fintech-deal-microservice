@@ -1,21 +1,20 @@
 package com.fintech.deal.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fintech.deal.dto.MainBorrowerDTO;
-import com.fintech.deal.feign.ContractorFeignClient;
+import com.fintech.deal.model.ContractorOutboxMessage;
 import com.fintech.deal.model.Deal;
 import com.fintech.deal.model.DealContractor;
 import com.fintech.deal.model.MessageStatus;
-import com.fintech.deal.model.ContractorOutboxMessage;
 import com.fintech.deal.model.StatusEnum;
 import com.fintech.deal.repository.ContractorOutboxRepository;
 import com.fintech.deal.service.ContractorOutboxService;
+import com.fintech.deal.service.MessageSenderService;
 import com.fintech.deal.util.WhenUpdateMainBorrowerInvoked;
 import com.onedlvb.advice.LogLevel;
 import com.onedlvb.advice.annotation.AuditLog;
-import feign.FeignException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -31,17 +30,20 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
 
 
     @NonNull
-    private ContractorFeignClient feignClient;
+    private ContractorOutboxRepository contractorOutboxRepository;
 
     @NonNull
-    private ContractorOutboxRepository contractorOutboxRepository;
+    private MessageSenderService messageSenderService;
+
+    @NonNull
+    private ObjectMapper objectMapper;
 
     /**
      * Updates the main borrower status for the given contractor and logs the outcome.
      * <p>
      * This method sends a request to the contractor service to update the main borrower status. It records
      * the outcome of the request and saves the message to the outbox repository.
-     * @see ContractorFeignClient
+     * @see MessageSenderService
      * @param contractor The contractor for whom the main borrower status is being updated.
      * @param hasMainDeals Indicates if the contractor has main deals.
      * @param whenInvoked Specifies when the update was invoked.
@@ -53,25 +55,23 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
         contractorOutboxMessage.setContractorId(contractor.getContractorId());
         contractorOutboxMessage.setActiveMainBorrower(hasMainDeals);
         try {
-            ResponseEntity<Void> response =
-                    feignClient.updateActiveMainBorrower(new MainBorrowerDTO(contractor.getContractorId(), hasMainDeals));
-            if (response.getStatusCode().is2xxSuccessful()) {
-                contractorOutboxMessage.setStatus(MessageStatus.SUCCESS);
-                contractorOutboxMessage.setSent(true);
-            } else {
-                contractorOutboxMessage.setStatus(MessageStatus.FAILED);
-            }
+            messageSenderService.send(
+                    objectMapper.writeValueAsString(
+                            new MainBorrowerDTO(contractor.getContractorId(), hasMainDeals)
+                    ));
+            contractorOutboxMessage.setStatus(MessageStatus.SUCCESS);
+            contractorOutboxMessage.setSent(true);
             contractorOutboxMessage.setContent(
-                    String.format("Update main borrower: Contractor ID %s Has main deals %s %s Status code %s",
-                    contractor.getContractorId(), hasMainDeals, whenInvoked, response.getStatusCode()));
+                    String.format("Update main borrower: Contractor ID %s Has main deals %s %s",
+                    contractor.getContractorId(), hasMainDeals, whenInvoked));
             contractorOutboxMessage.setException(null);
-
-        } catch (FeignException fe) {
+        } catch (Exception exception) {
             contractorOutboxMessage.setStatus(MessageStatus.FAILED);
             contractorOutboxMessage.setContent(
-                    String.format("Update main borrower: Contractor ID %s Has main deals %s %s Status code %s",
-                    contractor.getContractorId(), hasMainDeals, whenInvoked, fe.status()));
-            contractorOutboxMessage.setException(fe.getMessage());
+                    String.format("Update main borrower: Contractor ID %s Has main deals %s %s",
+                    contractor.getContractorId(), hasMainDeals, whenInvoked));
+            contractorOutboxMessage.setSent(false);
+            contractorOutboxMessage.setException(exception.getMessage());
         }
         contractorOutboxRepository.save(contractorOutboxMessage);
     }
@@ -88,7 +88,10 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
         for (ContractorOutboxMessage message : failedMessages) {
             if (shouldResend(message.getContractorId(), message)) {
                 try {
-                    feignClient.updateActiveMainBorrower(new MainBorrowerDTO(message.getContractorId(), message.isActiveMainBorrower()));
+                    messageSenderService.send(
+                            objectMapper.writeValueAsString(
+                                    new MainBorrowerDTO(message.getContractorId(), message.isActiveMainBorrower())
+                            ));
                     message.setStatus(MessageStatus.SUCCESS);
                     message.setSent(true);
                     message.setException(null);
